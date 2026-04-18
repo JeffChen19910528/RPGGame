@@ -49,41 +49,41 @@ namespace RPGGame
             return new List<Skill>
             {
                 new Skill(
-                    name:       "火球術",
-                    desc:       "召喚火焰轟炸，有機率使敵人燃燒",
-                    mpCost:     15,
-                    dmgMult:    2.2,
-                    effect:     SkillEffect.Burn,
+                    name:         L10n.Get("SKILL_FIREBALL_NAME"),
+                    desc:         L10n.Get("SKILL_FIREBALL_DESC"),
+                    mpCost:       15,
+                    dmgMult:      2.2,
+                    effect:       SkillEffect.Burn,
                     effectChance: 0.45f,
-                    color:      ConsoleColor.Red
+                    color:        ConsoleColor.Red
                 ),
                 new Skill(
-                    name:       "治癒術",
-                    desc:       "消耗 MP 恢復自身 HP",
-                    mpCost:     20,
-                    dmgMult:    0,
-                    isHeal:     true,
-                    healAmount: 35,
-                    color:      ConsoleColor.Green
+                    name:         L10n.Get("SKILL_HEAL_NAME"),
+                    desc:         L10n.Get("SKILL_HEAL_DESC"),
+                    mpCost:       20,
+                    dmgMult:      0,
+                    isHeal:       true,
+                    healAmount:   35,
+                    color:        ConsoleColor.Green
                 ),
                 new Skill(
-                    name:       "盾擊",
-                    desc:       "近身衝撞，有機率使敵人眩暈",
-                    mpCost:     10,
-                    dmgMult:    1.6,
-                    effect:     SkillEffect.Stun,
+                    name:         L10n.Get("SKILL_SHIELD_NAME"),
+                    desc:         L10n.Get("SKILL_SHIELD_DESC"),
+                    mpCost:       10,
+                    dmgMult:      1.6,
+                    effect:       SkillEffect.Stun,
                     effectChance: 0.40f,
-                    color:      ConsoleColor.Cyan
+                    color:        ConsoleColor.Cyan
                 ),
                 new Skill(
-                    name:       "暴走衝擊",
-                    desc:       "消耗 40 怒氣，釋放毀滅性打擊，高機率暴擊",
-                    mpCost:     0,
-                    rageCost:   40,
-                    dmgMult:    3.0,
-                    effect:     SkillEffect.Critical,
+                    name:         L10n.Get("SKILL_BERSERK_NAME"),
+                    desc:         L10n.Get("SKILL_BERSERK_DESC"),
+                    mpCost:       0,
+                    rageCost:     40,
+                    dmgMult:      3.0,
+                    effect:       SkillEffect.Critical,
                     effectChance: 0.60f,
-                    color:      ConsoleColor.Magenta
+                    color:        ConsoleColor.Magenta
                 )
             };
         }
@@ -93,22 +93,22 @@ namespace RPGGame
             return new List<Skill>
             {
                 new Skill(
-                    name:       "冰霜新星",
-                    desc:       "大範圍冰霜衝擊，必定眩暈敵人",
-                    mpCost:     28,
-                    dmgMult:    2.5,
-                    effect:     SkillEffect.Stun,
+                    name:         L10n.Get("SKILL_ICE_NAME"),
+                    desc:         L10n.Get("SKILL_ICE_DESC"),
+                    mpCost:       28,
+                    dmgMult:      2.5,
+                    effect:       SkillEffect.Stun,
                     effectChance: 1.0f,
-                    color:      ConsoleColor.Blue
+                    color:        ConsoleColor.Blue
                 ),
                 new Skill(
-                    name:       "大治癒術",
-                    desc:       "強力治癒魔法，大量恢復 HP",
-                    mpCost:     32,
-                    dmgMult:    0,
-                    isHeal:     true,
-                    healAmount: 65,
-                    color:      ConsoleColor.Green
+                    name:         L10n.Get("SKILL_GREATHEAL_NAME"),
+                    desc:         L10n.Get("SKILL_GREATHEAL_DESC"),
+                    mpCost:       32,
+                    dmgMult:      0,
+                    isHeal:       true,
+                    healAmount:   65,
+                    color:        ConsoleColor.Green
                 )
             };
         }

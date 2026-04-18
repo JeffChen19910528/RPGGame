@@ -29,10 +29,11 @@ namespace RPGGame
             _ = padded; // suppress warning
         }
 
-        public static void PressAnyKey(string prompt = "[ 按任意鍵繼續... ]")
+        public static void PressAnyKey(string? prompt = null)
         {
+            string label = prompt ?? L10n.Get("PRESS_ANY_KEY");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write($"\n  {prompt}");
+            Console.Write($"\n  {label}");
             Console.ResetColor();
             Console.ReadKey(true);
             Console.WriteLine();
@@ -51,7 +52,7 @@ namespace RPGGame
                     return choice;
 
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"  ✗ 請輸入 {min} 到 {max} 之間的數字");
+                Console.WriteLine(L10n.Get("INPUT_ERROR", min, max));
                 Console.ResetColor();
             }
         }
@@ -62,7 +63,7 @@ namespace RPGGame
             Console.Write($"\n  {prompt}: ");
             Console.ResetColor();
             string? result = Console.ReadLine();
-            return string.IsNullOrWhiteSpace(result) ? "勇者" : result;
+            return string.IsNullOrWhiteSpace(result) ? L10n.Get("CREATE_DEFAULT_NAME") : result;
         }
 
         public static void DrawProgressBar(int current, int max, int width = 20, ConsoleColor fillColor = ConsoleColor.Green)

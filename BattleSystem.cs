@@ -18,7 +18,7 @@ namespace RPGGame
         public BattleResult StartBattle(Enemy enemy, bool isFinalBoss = false)
         {
             AnimationSystem.ShowEnemyIntro(enemy);
-            Utils.PressAnyKey("[ 按任意鍵開始戰鬥... ]");
+            Utils.PressAnyKey(L10n.Get("BATTLE_START"));
 
             int turn = 0;
 
@@ -35,7 +35,7 @@ namespace RPGGame
                 // Player action
                 if (_player.CurrentStatus == StatusEffect.Stun)
                 {
-                    Log(ConsoleColor.Yellow, $"  {_player.Name} 眩暈中，無法行動！");
+                    Log(ConsoleColor.Yellow, L10n.Get("BATTLE_STUN_PLAYER", _player.Name));
                     _player.CurrentStatus = StatusEffect.None;
                     _player.StatusTurns = 0;
                 }
@@ -58,10 +58,10 @@ namespace RPGGame
                     int burnDmg = enemy.TickBurn();
                     if (burnDmg > 0)
                     {
-                        Log(ConsoleColor.DarkRed, $"  {enemy.Name} 受到灼燒傷害 {burnDmg}！(HP: {enemy.HP}/{enemy.MaxHP})");
+                        Log(ConsoleColor.DarkRed, L10n.Get("BATTLE_BURN_ENEMY", enemy.Name, burnDmg, enemy.HP, enemy.MaxHP));
                         if (!enemy.IsAlive)
                         {
-                            Log(ConsoleColor.Yellow, "  燃燒使其倒下了！");
+                            Log(ConsoleColor.Yellow, L10n.Get("BATTLE_BURN_KILL"));
                         }
                     }
                 }
@@ -77,7 +77,7 @@ namespace RPGGame
             if (_player.CurrentStatus != StatusEffect.Burn) return true;
             int dmg = _player.BurnDamagePerTurn > 0 ? _player.BurnDamagePerTurn : 6;
             _player.HP = Math.Max(0, _player.HP - dmg);
-            Log(ConsoleColor.DarkRed, $"  {_player.Name} 受到灼燒傷害 {dmg}！(HP: {_player.HP}/{_player.MaxHP})");
+            Log(ConsoleColor.DarkRed, L10n.Get("BATTLE_BURN_PLAYER", _player.Name, dmg, _player.HP, _player.MaxHP));
             _player.StatusTurns--;
             if (_player.StatusTurns <= 0)
             {
@@ -95,14 +95,14 @@ namespace RPGGame
             {
                 Console.WriteLine();
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("  【行動選擇】");
+                Console.WriteLine(L10n.Get("BATTLE_ACTION_TITLE"));
                 Console.ResetColor();
-                Console.WriteLine("  [1] 普通攻擊");
-                Console.WriteLine("  [2] 使用技能");
-                Console.WriteLine("  [3] 防禦姿態（受到傷害減半）");
-                Console.WriteLine("  [4] 查看狀態");
+                Console.WriteLine(L10n.Get("BATTLE_ACTION_1"));
+                Console.WriteLine(L10n.Get("BATTLE_ACTION_2"));
+                Console.WriteLine(L10n.Get("BATTLE_ACTION_3"));
+                Console.WriteLine(L10n.Get("BATTLE_ACTION_4"));
 
-                int choice = Utils.GetChoice("選擇行動", 1, 4);
+                int choice = Utils.GetChoice(L10n.Get("BATTLE_ACTION_SELECT"), 1, 4);
                 switch (choice)
                 {
                     case 1: DoNormalAttack(enemy); return;
@@ -138,7 +138,7 @@ namespace RPGGame
                 _player.HP = Math.Max(0, _player.HP - self);
                 _player.CorruptionLevel++;
                 AnimationSystem.UpdatePlayerArt(_player, "hurt");
-                Log(ConsoleColor.DarkMagenta, $"  ★ 暴走失控！{_player.Name} 反噬自身 {self} 點！(HP: {_player.HP}/{_player.MaxHP})");
+                Log(ConsoleColor.DarkMagenta, L10n.Get("BATTLE_BACKFIRE", _player.Name, self, _player.HP, _player.MaxHP));
                 Utils.Pause(200);
                 if (!_player.IsAlive) return;
             }
@@ -150,8 +150,8 @@ namespace RPGGame
             // Play animation
             AnimationSystem.AnimatePlayerAttack(_player, enemy);
 
-            string mark = _player.IsBerserk ? " ★暴走★" : "";
-            Log(ConsoleColor.Yellow, $"  {_player.Name}{mark} 攻擊 {enemy.Name} → 造成 {actual} 點傷害！");
+            string mark = _player.IsBerserk ? L10n.Get("BATTLE_BERSERK_TAG") : "";
+            Log(ConsoleColor.Yellow, L10n.Get("BATTLE_ATTACK_HIT", _player.Name, mark, enemy.Name, actual));
 
             if (_player.CurrentStatus == StatusEffect.Defending)
                 _player.CurrentStatus = StatusEffect.None;
@@ -163,33 +163,34 @@ namespace RPGGame
             {
                 Console.WriteLine();
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("  【技能列表】");
+                Console.WriteLine(L10n.Get("BATTLE_SKILL_TITLE"));
                 Console.ResetColor();
 
                 var skills = _player.Skills;
+                string rageLabel = L10n.Current == Language.English ? "RAGE" : "怒";
                 for (int i = 0; i < skills.Count; i++)
                 {
                     var s = skills[i];
                     bool canUse = s.MpCost <= _player.MP && s.RageCost <= _player.RageEnergy;
-                    string cost = s.MpCost > 0 ? $"MP:{s.MpCost}" : $"怒:{s.RageCost}";
+                    string cost = s.MpCost > 0 ? $"MP:{s.MpCost}" : $"{rageLabel}:{s.RageCost}";
                     Console.ForegroundColor = canUse ? s.Color : ConsoleColor.DarkGray;
-                    Console.WriteLine($"  [{i + 1}] {s.Name,-8} ({cost,6}) - {s.Description}");
+                    Console.WriteLine($"  [{i + 1}] {s.Name,-12} ({cost,6}) - {s.Description}");
                     Console.ResetColor();
                 }
-                Console.WriteLine("  [0] 返回");
+                Console.WriteLine(L10n.Get("BATTLE_SKILL_BACK"));
 
-                int choice = Utils.GetChoice("選擇技能", 0, skills.Count);
+                int choice = Utils.GetChoice(L10n.Get("BATTLE_SKILL_SELECT"), 0, skills.Count);
                 if (choice == 0) return false;
 
                 var skill = skills[choice - 1];
 
                 if (skill.MpCost > _player.MP)
                 {
-                    Log(ConsoleColor.Red, "  ✗ MP 不足！"); Utils.Pause(400); continue;
+                    Log(ConsoleColor.Red, L10n.Get("BATTLE_MP_LOW")); Utils.Pause(400); continue;
                 }
                 if (skill.RageCost > _player.RageEnergy)
                 {
-                    Log(ConsoleColor.Red, "  ✗ 怒氣不足！"); Utils.Pause(400); continue;
+                    Log(ConsoleColor.Red, L10n.Get("BATTLE_RAGE_LOW")); Utils.Pause(400); continue;
                 }
 
                 UseSkill(skill, enemy);
@@ -202,14 +203,14 @@ namespace RPGGame
             _player.MP -= skill.MpCost;
             _player.RageEnergy -= skill.RageCost;
 
-            Log(skill.Color, $"\n  ✦ {_player.Name} 使用了【{skill.Name}】！");
+            Log(skill.Color, L10n.Get("BATTLE_SKILL_USE", _player.Name, skill.Name));
             Utils.Pause(150);
 
             if (skill.IsHeal)
             {
                 AnimationSystem.AnimateHeal(_player);
                 _player.Heal(skill.HealAmount);
-                Log(ConsoleColor.Green, $"  ♥ 恢復了 {skill.HealAmount} 點 HP！(HP: {_player.HP}/{_player.MaxHP})");
+                Log(ConsoleColor.Green, L10n.Get("BATTLE_HEAL_MSG", skill.HealAmount, _player.HP, _player.MaxHP));
                 return;
             }
 
@@ -220,7 +221,7 @@ namespace RPGGame
                 _player.HP = Math.Max(0, _player.HP - selfDmg);
                 _player.CorruptionLevel++;
                 AnimationSystem.UpdatePlayerArt(_player, "hurt");
-                Log(ConsoleColor.DarkMagenta, $"  ★ 力量失控！{_player.Name} 反噬 {selfDmg} 點！");
+                Log(ConsoleColor.DarkMagenta, L10n.Get("BATTLE_RAGE_SKILL_BACKFIRE", _player.Name, selfDmg));
                 Utils.Pause(200);
                 if (!_player.IsAlive) return;
             }
@@ -232,7 +233,7 @@ namespace RPGGame
 
             AnimationSystem.AnimateSkill(_player, enemy, skill);
 
-            Log(ConsoleColor.Yellow, $"  → 對 {enemy.Name} 造成 {actualDmg} 點傷害！");
+            Log(ConsoleColor.Yellow, L10n.Get("BATTLE_SKILL_HIT", enemy.Name, actualDmg));
 
             // Apply effect
             if (skill.Effect != SkillEffect.None && _rng.NextDouble() < skill.EffectChance)
@@ -248,16 +249,16 @@ namespace RPGGame
             {
                 case SkillEffect.Burn:
                     enemy.ApplyBurn(9, 3);
-                    Log(ConsoleColor.Red, $"  🔥 {enemy.Name} 陷入燃燒狀態！(每回合 9 點)");
+                    Log(ConsoleColor.Red, L10n.Get("BATTLE_BURN_APPLY", enemy.Name));
                     break;
                 case SkillEffect.Stun:
                     enemy.ApplyStun(1);
-                    Log(ConsoleColor.Yellow, $"  ⚡ {enemy.Name} 被眩暈了！下回合無法行動！");
+                    Log(ConsoleColor.Yellow, L10n.Get("BATTLE_STUN_APPLY", enemy.Name));
                     break;
                 case SkillEffect.Critical:
                     int extra = Math.Max(1, (int)(_player.Attack * 0.9));
                     enemy.TakeDamage(extra);
-                    Log(ConsoleColor.Magenta, $"  ★★ 追加暴擊！額外 {extra} 點傷害！");
+                    Log(ConsoleColor.Magenta, L10n.Get("BATTLE_CRIT_APPLY", extra));
                     break;
             }
         }
@@ -267,7 +268,7 @@ namespace RPGGame
             _player.CurrentStatus = StatusEffect.Defending;
             AddRageWithBerserkCheck(5);
             AnimationSystem.AnimateDefend(_player);
-            Log(ConsoleColor.Cyan, $"  🛡 {_player.Name} 進入防禦姿態！本回合受到傷害減半。");
+            Log(ConsoleColor.Cyan, L10n.Get("BATTLE_DEFEND", _player.Name));
         }
 
         // ── Enemy side ──────────────────────────────────────────────────────
@@ -278,7 +279,7 @@ namespace RPGGame
 
             if (enemy.TickStun())
             {
-                Log(ConsoleColor.Yellow, $"\n  {enemy.Name} 眩暈中，無法行動！");
+                Log(ConsoleColor.Yellow, L10n.Get("BATTLE_ENEMY_STUN", enemy.Name));
                 return;
             }
 
@@ -293,14 +294,14 @@ namespace RPGGame
 
             if (wasDefending)
             {
-                Log(ConsoleColor.Cyan, $"  🛡 防禦！");
+                Log(ConsoleColor.Cyan, L10n.Get("BATTLE_DEFEND_TAG"));
                 _player.CurrentStatus = StatusEffect.None;
             }
 
             if (useSpecial)
-                Log(ConsoleColor.DarkRed, $"  ☠ {enemy.Name} 使用【{enemy.SpecialName}】！→ {_player.Name} 受到 {actualDamage} 點傷害！(HP: {_player.HP}/{_player.MaxHP})");
+                Log(ConsoleColor.DarkRed, L10n.Get("BATTLE_ENEMY_SPECIAL", enemy.Name, enemy.SpecialName, _player.Name, actualDamage, _player.HP, _player.MaxHP));
             else
-                Log(ConsoleColor.Red, $"  {enemy.Name} 攻擊 {_player.Name} → 受到 {actualDamage} 點傷害！(HP: {_player.HP}/{_player.MaxHP})");
+                Log(ConsoleColor.Red, L10n.Get("BATTLE_ENEMY_ATTACK", enemy.Name, _player.Name, actualDamage, _player.HP, _player.MaxHP));
         }
 
         // ── Resolution ──────────────────────────────────────────────────────
@@ -316,16 +317,16 @@ namespace RPGGame
                     _player.FinalBossDefeatedInBerserk = true;
 
                 bool leveled = _player.GainEXP(enemy.EXPReward);
-                Log(ConsoleColor.Cyan, $"  ▶ 獲得 {enemy.EXPReward} EXP！");
+                Log(ConsoleColor.Cyan, L10n.Get("BATTLE_EXP_GAIN", enemy.EXPReward));
 
                 if (leveled)
                 {
-                    Log(ConsoleColor.Yellow, $"\n  ★★ 升級！{_player.Name} 達到 Lv.{_player.Level}！");
-                    Log(ConsoleColor.Yellow, "     HP+20 / MP+10 / ATK+3 / DEF+2");
+                    Log(ConsoleColor.Yellow, L10n.Get("BATTLE_LEVEL_UP", _player.Name, _player.Level));
+                    Log(ConsoleColor.Yellow, L10n.Get("BATTLE_LEVEL_STATS"));
                 }
 
                 _player.RestoreMP(15);
-                Log(ConsoleColor.Blue, "  ▶ 戰鬥後恢復 15 MP");
+                Log(ConsoleColor.Blue, L10n.Get("BATTLE_MP_RESTORE"));
 
                 Utils.PressAnyKey();
                 return BattleResult.Victory;
@@ -333,7 +334,7 @@ namespace RPGGame
             else
             {
                 AnimationSystem.ShowDefeatBanner();
-                Log(ConsoleColor.Red, $"\n  {_player.Name} 倒下了...");
+                Log(ConsoleColor.Red, L10n.Get("BATTLE_DEFEAT_MSG", _player.Name));
                 Utils.PressAnyKey();
                 return BattleResult.Defeat;
             }

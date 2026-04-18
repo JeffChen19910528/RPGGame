@@ -4,6 +4,7 @@ using System.Collections.Generic;
 namespace RPGGame
 {
     public enum StatusEffect { None, Burn, Stun, Defending }
+    public enum PlayerClass { Warrior, Mage, Assassin }
 
     public class Equipment
     {
@@ -40,6 +41,16 @@ namespace RPGGame
         public bool IsBerserk { get; private set; }
         public int BerserkTurnsLeft { get; private set; }
         public int TotalBerserkUses { get; set; }
+
+        // Class
+        public PlayerClass Class { get; set; } = PlayerClass.Warrior;
+        public string ClassTitle => Class switch
+        {
+            PlayerClass.Warrior  => L10n.Get("CLASS_WARRIOR"),
+            PlayerClass.Mage     => L10n.Get("CLASS_MAGE"),
+            PlayerClass.Assassin => L10n.Get("CLASS_ASSASSIN"),
+            _ => L10n.Get("CLASS_HERO")
+        };
 
         // Story flags
         public int CorruptionLevel { get; set; }
@@ -100,8 +111,8 @@ namespace RPGGame
 
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine();
-            Console.WriteLine($"  ★★★ {Name} 的怒氣徹底爆發！！！");
-            Console.WriteLine($"  ★★★ 進入【暴走狀態】！攻擊力大幅提升，但可能失控！★★★");
+            Console.WriteLine(L10n.Get("BERSERK_TRIGGER_1", Name));
+            Console.WriteLine(L10n.Get("BERSERK_TRIGGER_2"));
             Console.ResetColor();
             Utils.Pause(600);
         }
@@ -114,7 +125,7 @@ namespace RPGGame
             {
                 IsBerserk = false;
                 Console.ForegroundColor = ConsoleColor.DarkMagenta;
-                Console.WriteLine($"\n  {Name} 從暴走狀態中逐漸清醒...");
+                Console.WriteLine(L10n.Get("BERSERK_END", Name));
                 Console.ResetColor();
             }
         }
@@ -178,7 +189,7 @@ namespace RPGGame
         {
             Weapon = weapon;
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"\n  ✦ 裝備武器：{weapon.Name}（ATK +{weapon.AtkBonus}）");
+            Console.WriteLine(L10n.Get("EQUIP_WEAPON_MSG", weapon.Name, weapon.AtkBonus));
             Console.ResetColor();
         }
 
@@ -186,7 +197,7 @@ namespace RPGGame
         {
             Armor = armor;
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"\n  ✦ 裝備防具：{armor.Name}（DEF +{armor.DefBonus}）");
+            Console.WriteLine(L10n.Get("EQUIP_ARMOR_MSG", armor.Name, armor.DefBonus));
             Console.ResetColor();
         }
 
@@ -201,7 +212,7 @@ namespace RPGGame
             if (IsBerserk)
             {
                 Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.Write($" ★暴走({BerserkTurnsLeft})★");
+                Console.Write($" {L10n.Get("STATUS_BERSERK_TAG")}({BerserkTurnsLeft})★");
             }
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write($" Lv.{Level}】");
@@ -213,7 +224,7 @@ namespace RPGGame
             else if (CurrentStatus == StatusEffect.Defending)
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write(" [防禦姿態]");
+                Console.Write($" {L10n.Get("STATUS_DEFENDING")}");
             }
             Console.ResetColor();
             Console.WriteLine();
@@ -231,11 +242,11 @@ namespace RPGGame
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine($" {MP}/{MaxMP}");
 
-            Console.Write("  怒 ");
+            Console.Write($"  {L10n.Get("STATUS_RAGE")}");
             ConsoleColor rageColor = IsBerserk ? ConsoleColor.Magenta : ConsoleColor.DarkRed;
             Utils.DrawProgressBar(IsBerserk ? MaxRageEnergy : RageEnergy, MaxRageEnergy, 20, rageColor);
             Console.ForegroundColor = IsBerserk ? ConsoleColor.Magenta : ConsoleColor.DarkGray;
-            Console.Write($" {(IsBerserk ? "MAX" : $"{RageEnergy}/{MaxRageEnergy}")}");
+            Console.Write($" {(IsBerserk ? L10n.Get("STATUS_RAGE_MAX") : $"{RageEnergy}/{MaxRageEnergy}")}");
             Console.ResetColor();
             Console.WriteLine();
         }

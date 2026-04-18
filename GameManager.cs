@@ -16,6 +16,7 @@ namespace RPGGame
 
         public void Run()
         {
+            SelectLanguage();
             while (true)
             {
                 ShowTitle();
@@ -33,6 +34,25 @@ namespace RPGGame
                 if (_story?.RestartRequested == true) continue;
                 break;
             }
+        }
+
+        // ── Language Selection ───────────────────────────────────────────────
+
+        private static void SelectLanguage()
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine();
+            Console.WriteLine("  ╔══════════════════════════════════════════════╗");
+            Console.WriteLine("  ║   Select Language  /  語言選擇  /  言語選択  ║");
+            Console.WriteLine("  ╚══════════════════════════════════════════════╝");
+            Console.ResetColor();
+            Console.WriteLine();
+            Console.WriteLine(L10n.Get("LANG_ZH"));
+            Console.WriteLine(L10n.Get("LANG_EN"));
+            Console.WriteLine(L10n.Get("LANG_JA"));
+            int lang = Utils.GetChoice(L10n.Get("LANG_PROMPT"), 1, 3);
+            L10n.Current = lang switch { 1 => Language.Chinese, 2 => Language.English, _ => Language.Japanese };
         }
 
         // ── Title / Menu ────────────────────────────────────────────────────
@@ -63,18 +83,18 @@ namespace RPGGame
 
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("  【主 選 單】");
+            Console.WriteLine(L10n.Get("MENU_TITLE"));
             Console.ResetColor();
-            Console.WriteLine("  [1] 新遊戲");
+            Console.WriteLine(L10n.Get("MENU_NEW_GAME"));
 
             Console.ForegroundColor = hasSave ? ConsoleColor.White : ConsoleColor.DarkGray;
-            Console.WriteLine($"  [2] 讀取存檔{(hasSave ? "" : "（無存檔）")}");
+            Console.WriteLine(hasSave ? L10n.Get("MENU_LOAD") : L10n.Get("MENU_LOAD_NONE"));
             Console.ResetColor();
 
-            Console.WriteLine("  [3] 遊玩說明");
-            Console.WriteLine("  [4] 退出遊戲");
+            Console.WriteLine(L10n.Get("MENU_HELP"));
+            Console.WriteLine(L10n.Get("MENU_QUIT"));
 
-            return Utils.GetChoice("選擇", 1, 4);
+            return Utils.GetChoice(L10n.Get("MENU_SELECT"), 1, 4);
         }
 
         // ── New Game ─────────────────────────────────────────────────────────
@@ -82,38 +102,39 @@ namespace RPGGame
         private void StartNewGame()
         {
             Console.Clear();
-            Utils.TypeText("\n  歡迎來到《暴走：黑暗年代記》", 38, ConsoleColor.Yellow);
-            Utils.TypeText("  這是一個關於憤怒、選擇與自我的故事。", 38);
+            Utils.TypeText(L10n.Get("CREATE_WELCOME_1"), 38, ConsoleColor.Yellow);
+            Utils.TypeText(L10n.Get("CREATE_WELCOME_2"), 38);
             Utils.Pause(400);
 
             // ── Character creation ────────────────────────────────────────
-            Utils.PrintTitle("創 建 角 色");
-            string name = Utils.GetString("請輸入角色名字");
+            Utils.PrintTitle(L10n.Get("CREATE_TITLE"));
+            string name = Utils.GetString(L10n.Get("CREATE_NAME_PROMPT"));
 
-            Console.WriteLine("\n  選擇你的職業：");
-            Console.WriteLine("  [1] 戰士  ── HP+30, DEF+5，怒氣累積較快");
-            Console.WriteLine("  [2] 法師  ── MP+30, ATK+3，技能傷害提升");
-            Console.WriteLine("  [3] 刺客  ── ATK+8，每次攻擊獲得更多怒氣");
+            Console.WriteLine(L10n.Get("CREATE_CLASS_INTRO"));
+            Console.WriteLine(L10n.Get("CREATE_CLASS_1"));
+            Console.WriteLine(L10n.Get("CREATE_CLASS_2"));
+            Console.WriteLine(L10n.Get("CREATE_CLASS_3"));
 
-            int cls = Utils.GetChoice("選擇職業", 1, 3);
+            int cls = Utils.GetChoice(L10n.Get("CREATE_CLASS_SELECT"), 1, 3);
 
             _player = new Player(name);
+            _player.Class = cls switch { 1 => PlayerClass.Warrior, 2 => PlayerClass.Mage, _ => PlayerClass.Assassin };
             switch (cls)
             {
                 case 1:
                     _player.MaxHP += 30; _player.HP += 30;
                     _player.BaseDefense += 5;
-                    Utils.TypeText($"\n  {name} 是一名無畏的戰士。", 38, ConsoleColor.Yellow);
+                    Utils.TypeText($"\n  {name} {L10n.Get("INTRO_WARRIOR")}。", 38, ConsoleColor.Yellow);
                     break;
                 case 2:
                     _player.MaxMP += 30; _player.MP += 30;
                     _player.BaseAttack += 3;
-                    Utils.TypeText($"\n  {name} 是一名精通魔法的法師。", 38, ConsoleColor.Cyan);
+                    Utils.TypeText($"\n  {name} {L10n.Get("INTRO_MAGE")}。", 38, ConsoleColor.Cyan);
                     break;
                 case 3:
                     _player.BaseAttack += 8;
                     _player.MaxHP -= 10; _player.HP -= 10;
-                    Utils.TypeText($"\n  {name} 是一名行動敏捷的刺客。", 38, ConsoleColor.DarkGray);
+                    Utils.TypeText($"\n  {name} {L10n.Get("INTRO_ASSASSIN")}。", 38, ConsoleColor.DarkGray);
                     break;
             }
 
@@ -146,7 +167,7 @@ namespace RPGGame
             if (!File.Exists(SaveFile))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("\n  ✗ 找不到存檔！");
+                Console.WriteLine(L10n.Get("LOAD_FAIL"));
                 Console.ResetColor();
                 Utils.Pause(1000);
                 return;
@@ -163,9 +184,9 @@ namespace RPGGame
                 _story = new StoryManager(_player, _battle, _rng);
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"\n  ✓ 讀取成功！繼續 {data.PlayerName} 的旅程。");
+                Console.WriteLine(L10n.Get("LOAD_SUCCESS", data.PlayerName));
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine($"  ▶ 從第 {data.CurrentChapter} 章繼續");
+                Console.WriteLine(L10n.Get("LOAD_CHAPTER", data.CurrentChapter));
                 Console.ResetColor();
                 Utils.Pause(800);
 
@@ -191,7 +212,7 @@ namespace RPGGame
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"\n  ✗ 存檔損壞（{ex.Message}），開始新遊戲。");
+                Console.WriteLine(L10n.Get("LOAD_CORRUPT"));
                 Console.ResetColor();
                 Utils.Pause(1200);
                 StartNewGame();
@@ -220,6 +241,7 @@ namespace RPGGame
                 AcceptedDark    = _player.AcceptedDarkPower,
                 HelpedVillager  = _player.HelpedVillager,
                 BerserkUses     = _player.TotalBerserkUses,
+                ClassId         = (int)_player.Class,
                 CurrentChapter  = chapter
             };
 
@@ -227,7 +249,7 @@ namespace RPGGame
             File.WriteAllText(SaveFile, json);
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine("\n  [遊戲已自動儲存]");
+            Console.WriteLine(L10n.Get("SAVE_AUTO"));
             Console.ResetColor();
             Utils.Pause(400);
         }
@@ -245,10 +267,11 @@ namespace RPGGame
                 BaseDefense    = d.BaseDefense,
                 EXP            = d.EXP,
                 EXPToNextLevel = d.EXPToNextLevel,
-                CorruptionLevel  = d.CorruptionLevel,
+                CorruptionLevel   = d.CorruptionLevel,
                 AcceptedDarkPower = d.AcceptedDark,
                 HelpedVillager    = d.HelpedVillager,
-                TotalBerserkUses  = d.BerserkUses
+                TotalBerserkUses  = d.BerserkUses,
+                Class             = (PlayerClass)d.ClassId
             };
 
             // Re-unlock advanced skills if appropriate level
@@ -263,32 +286,29 @@ namespace RPGGame
         private static void ShowHelp()
         {
             Console.Clear();
+            Utils.PrintTitle(L10n.Get("HELP_TITLE"));
             Utils.PrintTitle("遊 玩 說 明");
             Console.WriteLine();
-            Console.WriteLine("  ◆ 基本玩法");
-            Console.WriteLine("    每回合選擇行動：攻擊 / 技能 / 防禦");
-            Console.WriteLine("    擊敗敵人獲得 EXP，升等後屬性提升");
+            Console.WriteLine(L10n.Get("HELP_BASICS"));
+            Console.WriteLine(L10n.Get("HELP_BASICS_1"));
+            Console.WriteLine(L10n.Get("HELP_BASICS_2"));
             Console.WriteLine();
-            Console.WriteLine("  ◆ 暴走系統");
             Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine("    攻擊和受傷都會累積怒氣（0-100）");
-            Console.WriteLine("    怒氣滿了自動觸發【暴走狀態】（4回合）");
-            Console.WriteLine("    暴走中：攻擊力 ×1.5，但每次攻擊有 20% 反噬");
+            Console.WriteLine(L10n.Get("HELP_BERSERK"));
+            Console.WriteLine(L10n.Get("HELP_BERSERK_1"));
+            Console.WriteLine(L10n.Get("HELP_BERSERK_2"));
+            Console.WriteLine(L10n.Get("HELP_BERSERK_3"));
             Console.ResetColor();
             Console.WriteLine();
-            Console.WriteLine("  ◆ 技能系統");
-            Console.WriteLine("    火球術  ── 消耗 MP，高傷害 + 燃燒機率");
-            Console.WriteLine("    治癒術  ── 消耗 MP，恢復 HP");
-            Console.WriteLine("    盾擊    ── 消耗 MP，傷害 + 眩暈機率");
-            Console.WriteLine("    暴走衝擊 ── 消耗 40 怒氣，超高傷害 + 暴擊");
+            Console.WriteLine(L10n.Get("HELP_SKILLS"));
+            Console.WriteLine(L10n.Get("HELP_SKILLS_1"));
+            Console.WriteLine(L10n.Get("HELP_SKILLS_2"));
+            Console.WriteLine(L10n.Get("HELP_SKILLS_3"));
+            Console.WriteLine(L10n.Get("HELP_SKILLS_4"));
             Console.WriteLine();
-            Console.WriteLine("  ◆ 結局條件（共 3 種）");
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("    好結局：腐化值低，以正直之心打倒魔王");
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("    壞結局：接受黑暗力量或腐化值過高");
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine("    隱藏結局：(提示：在最終戰中保持暴走狀態...)");
+            Console.WriteLine(L10n.Get("HELP_ENDINGS"));
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(L10n.Get("HELP_ENDINGS_HINT"));
             Console.ResetColor();
             Utils.PressAnyKey();
         }
@@ -340,6 +360,7 @@ namespace RPGGame
         public bool AcceptedDark { get; set; }
         public bool HelpedVillager { get; set; }
         public int BerserkUses { get; set; }
+        public int ClassId { get; set; }
         public int CurrentChapter { get; set; }
     }
 }

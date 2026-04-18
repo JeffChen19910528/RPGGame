@@ -31,7 +31,16 @@ namespace RPGGame
 
             Utils.TypeText("\n  黑暗中，一雙眼睛緩緩睜開。", 38);
             Utils.Pause(200);
-            Utils.TypeText($"  你是 {_player.Name}，一名被世界遺忘的勇者。", 38);
+            Utils.TypeText($"  你是 {_player.Name}，一名被世界遺忘的{_player.ClassTitle}。", 38);
+
+            string classAwaken = _player.Class switch
+            {
+                PlayerClass.Warrior  => "  雙手本能地握緊——身體還記得劍的重量。",
+                PlayerClass.Mage     => "  魔力在指尖微微流動，三年沉眠未能將它熄滅。",
+                PlayerClass.Assassin => "  眼睛在黑暗中快速適應，習慣性地掃描每個角落。",
+                _ => ""
+            };
+            Utils.TypeText(classAwaken, 38, ConsoleColor.DarkGray);
             Utils.Pause(200);
             Utils.TypeText("  三年前，魔王夜陌魯斯率領魔族大軍入侵，", 38);
             Utils.TypeText("  你在最後的戰役中受了致命重傷，此後一直昏迷。", 38);
@@ -306,7 +315,7 @@ namespace RPGGame
         }
 
         // ════════════════════════════════════════════════════════════════════
-        // ENDINGS
+        // ENDINGS  ── 7 endings based on choices, class, corruption
         // ════════════════════════════════════════════════════════════════════
 
         private void DetermineEnding()
@@ -314,50 +323,188 @@ namespace RPGGame
             Console.Clear();
             Utils.Pause(700);
 
-            // Hidden: Defeated final boss WHILE in berserk AND never accepted dark power
-            if (_player.FinalBossDefeatedInBerserk && !_player.AcceptedDarkPower && _player.CorruptionLevel <= 1)
+            // Hidden ✦: Never berserk, never dark, always helped, no corruption
+            if (_player.TotalBerserkUses == 0 && !_player.AcceptedDarkPower
+                && _player.CorruptionLevel == 0 && _player.HelpedVillager)
             {
-                EndingHidden();
+                EndingHiddenPure(); return;
             }
-            // Bad: High corruption or deal with demon king
-            else if (_player.CorruptionLevel >= 4 || _player.AcceptedDarkPower)
+
+            // Hidden ★: Final boss defeated while berserk, no dark power
+            if (_player.FinalBossDefeatedInBerserk && !_player.AcceptedDarkPower
+                && _player.CorruptionLevel <= 1)
             {
-                EndingBad();
+                EndingHiddenBerserk(); return;
             }
-            // Good: Clean run
-            else
+
+            // Worst: Completely consumed by darkness
+            if (_player.CorruptionLevel >= 6)
             {
-                EndingGood();
+                EndingWorst(); return;
             }
+
+            // Bad: Significantly corrupted
+            if (_player.CorruptionLevel >= 4 || (_player.AcceptedDarkPower && _player.CorruptionLevel >= 3))
+            {
+                EndingBad(); return;
+            }
+
+            // Grey: Touched darkness but not lost
+            if (_player.AcceptedDarkPower || _player.CorruptionLevel >= 2)
+            {
+                EndingGrey(); return;
+            }
+
+            // Good (Lonely): Clean but ignored someone who needed help
+            if (!_player.HelpedVillager)
+            {
+                EndingGoodLonely(); return;
+            }
+
+            // Good (Light): True hero path
+            EndingGood();
         }
 
-        private void EndingGood()
+        private void EndingHiddenPure()
         {
-            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine();
-            Console.WriteLine("  ╔══════════════════════════════════════════╗");
-            Console.WriteLine("  ║           好結局：光明的彼岸             ║");
-            Console.WriteLine("  ╚══════════════════════════════════════════╝");
+            Console.WriteLine("  ╔══════════════════════════════════════════════╗");
+            Console.WriteLine("  ║      ✦ 隱藏結局：純淨之道 ✦               ║");
+            Console.WriteLine("  ╚══════════════════════════════════════════════╝");
             Console.ResetColor();
             Utils.Pause(400);
 
-            Utils.TypeText("\n  魔王夜陌魯斯轟然倒地，黑暗之力從世界各角落消散。", 38);
-            Utils.TypeText("  天空緩緩破曉，久違的陽光穿透雲層，照亮大地。", 38);
+            Utils.TypeText("\n  純白的光從天空傾瀉而下——", 38, ConsoleColor.White);
+            Utils.TypeText("  不是魔法，不是憤怒，而是你自己的光。", 38, ConsoleColor.White);
             Utils.Pause(300);
-            Utils.TypeText($"\n  {_player.Name} 佇立在魔王城的廢墟上，", 38);
-            Utils.TypeText("  三年的昏迷，三天的旅程，此刻都化為胸中的平靜。", 38);
+            Utils.TypeText($"\n  {_player.Name} 站在魔王消散的地方，雙手沒有顫抖。", 38);
+            Utils.TypeText("  整段旅程，你從未讓憤怒佔據你，", 38);
+            Utils.TypeText("  從未以黑暗換取捷徑，", 38);
+            Utils.TypeText("  你甚至在最疲憊的時候，回頭救了那位老婆婆。", 38);
             Utils.Pause(300);
-            Utils.TypeText("\n  遠處，村民們向你奔來，歡呼聲響徹雲霄。", 38);
-            if (_player.HelpedVillager)
-                Utils.TypeText("  那位老婆婆也在人群中，對你露出感激的微笑。", 38);
+            Utils.TypeText("\n  老祭司看著你回來，沉默良久後，緩緩跪下。", 38);
+            Utils.TypeText("  「我見過無數勇者，」他說，聲音顫抖，", 38, ConsoleColor.Cyan);
+            Utils.TypeText("  「但只有你——是真正意義上的英雄。」", 38, ConsoleColor.Cyan);
             Utils.Pause(400);
-            Utils.TypeText("\n  「我做到了。」", 38, ConsoleColor.White);
-            Utils.TypeText("  這三個字，你等了三年。", 38);
 
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("\n\n  ══════════════════════════════════════");
-            Console.WriteLine("  GOOD ENDING  ─  光明的彼岸");
-            Console.WriteLine("  ══════════════════════════════════════");
+            string classLine = _player.Class switch
+            {
+                PlayerClass.Warrior  => "  人們傳說，那名戰士的劍從未沾染過不義之血。",
+                PlayerClass.Mage     => "  人們傳說，那名法師的魔法之中，帶著光一般的溫度。",
+                PlayerClass.Assassin => "  人們傳說，那名刺客從陰影中走出，卻把陽光帶回了世界。",
+                _ => ""
+            };
+            Utils.TypeText($"\n  {classLine}", 38, ConsoleColor.DarkYellow);
+            Utils.Pause(300);
+
+            Utils.TypeText("\n  天空的顏色，比昨天更藍了一些。", 38);
+            Utils.TypeText("  關於明天，你心裡還沒有答案。", 38);
+            Utils.TypeText("  但這一刻，只有平靜。", 38, ConsoleColor.White);
+
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("\n\n  ══════════════════════════════════════════════");
+            Console.WriteLine("  HIDDEN ENDING ✦  ─  純淨之道");
+            Console.WriteLine("  ✦ 恭喜！你以最純粹的方式完成了整段旅程！");
+            Console.WriteLine("  ══════════════════════════════════════════════");
+            Console.ResetColor();
+        }
+
+        private void EndingHiddenBerserk()
+        {
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine();
+            Console.WriteLine("  ╔══════════════════════════════════════════════╗");
+            Console.WriteLine("  ║      ★ 隱藏結局：暴走聖者 ★              ║");
+            Console.WriteLine("  ╚══════════════════════════════════════════════╝");
+            Console.ResetColor();
+            Utils.Pause(400);
+
+            Utils.TypeText("\n  在暴走的狂風暴雨之中，你打倒了魔王。", 38, ConsoleColor.Magenta);
+            Utils.TypeText("  那股失控的力量——它一直都在你的掌控之中。", 38);
+            Utils.Pause(300);
+            Utils.TypeText($"\n  {_player.Name} 緩緩從暴走狀態中甦醒，", 38);
+            Utils.TypeText("  卻比任何時候都更加清醒、更加平靜。", 38);
+            Utils.Pause(300);
+            Utils.TypeText("\n  「我明白了。不是壓制憤怒，」", 38, ConsoleColor.White);
+            Utils.TypeText("  「而是——與它共存。」", 38, ConsoleColor.White);
+            Utils.Pause(400);
+
+            switch (_player.Class)
+            {
+                case PlayerClass.Warrior:
+                    Utils.TypeText("\n  從今以後，那把劍所到之處，", 38, ConsoleColor.Yellow);
+                    Utils.TypeText("  怒火不再是破壞，而是一道守護的屏障。", 38, ConsoleColor.Yellow);
+                    break;
+                case PlayerClass.Mage:
+                    Utils.TypeText("\n  從今以後，你的魔法中融入了怒與靜，", 38, ConsoleColor.Yellow);
+                    Utils.TypeText("  那是這個世界前所未見的力量形態。", 38, ConsoleColor.Yellow);
+                    break;
+                case PlayerClass.Assassin:
+                    Utils.TypeText("\n  從今以後，你在黑暗中行動，", 38, ConsoleColor.Yellow);
+                    Utils.TypeText("  但那團怒火，成了你永不熄滅的方向感。", 38, ConsoleColor.Yellow);
+                    break;
+            }
+            Utils.Pause(300);
+
+            Utils.TypeText("\n  世界還有很多裂縫未被縫合，", 38);
+            Utils.TypeText("  但那都是明天的事了。", 38);
+            Utils.TypeText("  此刻，你只需要站在這裡，呼吸。", 38, ConsoleColor.Magenta);
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("\n\n  ══════════════════════════════════════════════");
+            Console.WriteLine("  SECRET ENDING ★  ─  暴走聖者");
+            Console.WriteLine("  🎊 恭喜你發現了隱藏結局！");
+            Console.WriteLine("  ══════════════════════════════════════════════");
+            Console.ResetColor();
+        }
+
+        private void EndingWorst()
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine();
+            Console.WriteLine("  ╔══════════════════════════════════════════════╗");
+            Console.WriteLine("  ║          最壞結局：魔王轉世                  ║");
+            Console.WriteLine("  ╚══════════════════════════════════════════════╝");
+            Console.ResetColor();
+            Utils.Pause(400);
+
+            Utils.TypeText("\n  夜陌魯斯死了。", 38, ConsoleColor.DarkRed);
+            Utils.TypeText("  但世界並不因此感到安全。", 38, ConsoleColor.DarkRed);
+            Utils.Pause(300);
+            Utils.TypeText($"\n  {_player.Name} 緩緩轉身，黑暗的紋路已爬滿全身，", 38);
+            Utils.TypeText("  那雙眼睛裡，燃燒著和魔王一模一樣的光。", 38, ConsoleColor.DarkMagenta);
+            Utils.Pause(400);
+            Utils.TypeText("\n  遠處，逃難的士兵對同伴低語：", 38, ConsoleColor.DarkGray);
+            Utils.TypeText("  「魔王死了...但那個人...」", 38, ConsoleColor.DarkGray);
+            Utils.TypeText("  「那個人比魔王更可怕。」", 38, ConsoleColor.DarkGray);
+            Utils.Pause(400);
+
+            switch (_player.Class)
+            {
+                case PlayerClass.Warrior:
+                    Utils.TypeText("\n  曾被稱為無畏戰士的名字，", 38, ConsoleColor.DarkMagenta);
+                    Utils.TypeText("  如今成了孩子們夜間最怕聽到的詞語。", 38, ConsoleColor.DarkMagenta);
+                    break;
+                case PlayerClass.Mage:
+                    Utils.TypeText("\n  曾被稱為智慧法師的那雙手，", 38, ConsoleColor.DarkMagenta);
+                    Utils.TypeText("  如今只知道如何施展毀滅的魔法。", 38, ConsoleColor.DarkMagenta);
+                    break;
+                case PlayerClass.Assassin:
+                    Utils.TypeText("\n  曾在陰影中守護的那個身影，", 38, ConsoleColor.DarkMagenta);
+                    Utils.TypeText("  如今成了陰影本身。", 38, ConsoleColor.DarkMagenta);
+                    break;
+            }
+            Utils.Pause(400);
+
+            Utils.TypeText("\n  黑暗的輪迴並沒有終結——", 38);
+            Utils.TypeText("  只是換了一個人來背負它。", 38, ConsoleColor.DarkRed);
+            Utils.TypeText("\n  你覺得，這一次，還有人能阻止它嗎？", 38, ConsoleColor.DarkGray);
+
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine("\n\n  ══════════════════════════════════════════════");
+            Console.WriteLine("  WORST ENDING  ─  魔王轉世");
+            Console.WriteLine("  ══════════════════════════════════════════════");
             Console.ResetColor();
         }
 
@@ -365,9 +512,9 @@ namespace RPGGame
         {
             Console.ForegroundColor = ConsoleColor.DarkRed;
             Console.WriteLine();
-            Console.WriteLine("  ╔══════════════════════════════════════════╗");
-            Console.WriteLine("  ║           壞結局：黑暗的繼承者           ║");
-            Console.WriteLine("  ╚══════════════════════════════════════════╝");
+            Console.WriteLine("  ╔══════════════════════════════════════════════╗");
+            Console.WriteLine("  ║          壞結局：黑暗的繼承者                ║");
+            Console.WriteLine("  ╚══════════════════════════════════════════════╝");
             Console.ResetColor();
             Utils.Pause(400);
 
@@ -381,42 +528,190 @@ namespace RPGGame
             Utils.TypeText("\n  身後，村民們看見了你的變化，紛紛後退。", 38, ConsoleColor.DarkGray);
             Utils.TypeText("  「怪物...那是怪物！」", 38, ConsoleColor.DarkGray);
             Utils.Pause(300);
+
+            switch (_player.Class)
+            {
+                case PlayerClass.Warrior:
+                    Utils.TypeText("\n  盔甲之下，那份曾作為戰士的驕傲，", 38);
+                    Utils.TypeText("  正在慢慢碎裂。", 38, ConsoleColor.DarkMagenta);
+                    break;
+                case PlayerClass.Mage:
+                    Utils.TypeText("\n  魔力的流動已不再純淨，", 38);
+                    Utils.TypeText("  你甚至分不清那是你的意志，還是黑暗的呼喚。", 38, ConsoleColor.DarkMagenta);
+                    break;
+                case PlayerClass.Assassin:
+                    Utils.TypeText("\n  陰影一直是你的盟友，", 38);
+                    Utils.TypeText("  只是現在，連陰影都開始感到陌生。", 38, ConsoleColor.DarkMagenta);
+                    break;
+            }
+            Utils.Pause(300);
+
             Utils.TypeText("\n  打倒魔王的你，已經成為了新的黑暗。", 38, ConsoleColor.DarkMagenta);
+            Utils.TypeText("  也許某天，又會有一個勇者被老祭司叫醒，", 38);
+            Utils.TypeText("  被派來尋找你。", 38, ConsoleColor.DarkGray);
 
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("\n\n  ══════════════════════════════════════");
+            Console.WriteLine("\n\n  ══════════════════════════════════════════════");
             Console.WriteLine("  BAD ENDING  ─  黑暗的繼承者");
-            Console.WriteLine("  ══════════════════════════════════════");
+            Console.WriteLine("  ══════════════════════════════════════════════");
             Console.ResetColor();
         }
 
-        private void EndingHidden()
+        private void EndingGrey()
         {
-            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine();
-            Console.WriteLine("  ╔══════════════════════════════════════════╗");
-            Console.WriteLine("  ║      ★ 隱藏結局：暴走者的覺悟 ★        ║");
-            Console.WriteLine("  ╚══════════════════════════════════════════╝");
+            Console.WriteLine("  ╔══════════════════════════════════════════════╗");
+            Console.WriteLine("  ║         灰色結局：業火之中的行者             ║");
+            Console.WriteLine("  ╚══════════════════════════════════════════════╝");
             Console.ResetColor();
             Utils.Pause(400);
 
-            Utils.TypeText("\n  在暴走的狂風暴雨之中，你打倒了魔王。", 38, ConsoleColor.Magenta);
-            Utils.TypeText("  那股失控的力量——它一直都在你的掌控之中。", 38);
+            Utils.TypeText("\n  魔王的黑暗消散了，但你的心底——", 38, ConsoleColor.DarkYellow);
+            Utils.TypeText("  還留著一片灰燼。", 38, ConsoleColor.DarkYellow);
             Utils.Pause(300);
-            Utils.TypeText($"\n  {_player.Name} 緩緩從暴走狀態中甦醒，", 38);
-            Utils.TypeText("  卻比任何時候都更加清醒、更加平靜。", 38);
-            Utils.Pause(300);
-            Utils.TypeText("\n  「我明白了。不是壓制憤怒，」", 38, ConsoleColor.White);
-            Utils.TypeText("  「而是——與它共存。」", 38, ConsoleColor.White);
+            Utils.TypeText($"\n  {_player.Name} 沒有像英雄一樣歡呼，", 38);
+            Utils.TypeText("  也沒有因黑暗沉淪——只是靜靜地站著，", 38);
+            Utils.TypeText("  望著遠方，某種說不清的東西壓在胸口。", 38);
             Utils.Pause(400);
-            Utils.TypeText("\n  從今日起，你將以『暴走聖者』之名為世人所知——", 38, ConsoleColor.Yellow);
-            Utils.TypeText("  那個能駕馭最危險的力量，卻從不被其吞噬的人。", 38, ConsoleColor.Yellow);
 
+            if (_player.HelpedVillager)
+            {
+                Utils.TypeText("\n  老婆婆從人群中走來，握住你的手。", 38);
+                Utils.TypeText("  「孩子，你還在這裡。這就夠了。」", 38, ConsoleColor.Cyan);
+            }
+            else
+            {
+                Utils.TypeText("\n  老祭司靜靜走來，沒有稱讚，也沒有責備。", 38);
+                Utils.TypeText("  「你回來了。」他說，僅此而已。", 38, ConsoleColor.Cyan);
+            }
+            Utils.Pause(400);
+
+            switch (_player.Class)
+            {
+                case PlayerClass.Warrior:
+                    Utils.TypeText("\n  戰士的路，原以為只是勝與敗，", 38);
+                    Utils.TypeText("  卻不料，中間還有寬闊的灰色地帶。", 38, ConsoleColor.DarkYellow);
+                    break;
+                case PlayerClass.Mage:
+                    Utils.TypeText("\n  魔法的真理，從不是非黑即白，", 38);
+                    Utils.TypeText("  你終於明白了，只是代價有點大。", 38, ConsoleColor.DarkYellow);
+                    break;
+                case PlayerClass.Assassin:
+                    Utils.TypeText("\n  生活在陰影中的人，最了解灰色的味道，", 38);
+                    Utils.TypeText("  但這次嚐到的，比任何時候都深。", 38, ConsoleColor.DarkYellow);
+                    break;
+            }
+            Utils.Pause(400);
+
+            Utils.TypeText("\n  你不確定自己算是英雄還是罪人，", 38);
+            Utils.TypeText("  也許，答案會在往後的歲月中慢慢浮現。", 38);
+            Utils.TypeText("  或者，永遠不會。", 38, ConsoleColor.DarkGray);
+
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine("\n\n  ══════════════════════════════════════════════");
+            Console.WriteLine("  GREY ENDING  ─  業火之中的行者");
+            Console.WriteLine("  ══════════════════════════════════════════════");
+            Console.ResetColor();
+        }
+
+        private void EndingGoodLonely()
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine();
+            Console.WriteLine("  ╔══════════════════════════════════════════════╗");
+            Console.WriteLine("  ║          好結局：孤獨的勝者                  ║");
+            Console.WriteLine("  ╚══════════════════════════════════════════════╝");
+            Console.ResetColor();
+            Utils.Pause(400);
+
+            Utils.TypeText("\n  魔王夜陌魯斯轟然倒地，黑暗之力從世界各角落消散。", 38);
+            Utils.TypeText("  天空緩緩破曉，久違的陽光穿透雲層，照亮大地。", 38);
+            Utils.Pause(300);
+            Utils.TypeText($"\n  {_player.Name} 佇立在廢墟上，等待著什麼。", 38);
+            Utils.TypeText("  村民們向你奔來，歡呼聲響徹雲霄。", 38);
+            Utils.Pause(300);
+            Utils.TypeText("\n  但你記得那條路上的哭聲，", 38, ConsoleColor.DarkGray);
+            Utils.TypeText("  記得你沒有停下腳步。", 38, ConsoleColor.DarkGray);
+            Utils.Pause(400);
+
+            switch (_player.Class)
+            {
+                case PlayerClass.Warrior:
+                    Utils.TypeText("\n  戰士的信條是前進、前進、再前進，", 38);
+                    Utils.TypeText("  但此刻，你第一次懷疑那條信條是否完整。", 38, ConsoleColor.Cyan);
+                    break;
+                case PlayerClass.Mage:
+                    Utils.TypeText("\n  知識讓你強大，書讓你聰明，", 38);
+                    Utils.TypeText("  但有些課題，書上根本找不到。", 38, ConsoleColor.Cyan);
+                    break;
+                case PlayerClass.Assassin:
+                    Utils.TypeText("\n  刺客的本能是不回頭，不留戀，", 38);
+                    Utils.TypeText("  但今天，那種本能讓你感到一種難以名狀的刺痛。", 38, ConsoleColor.Cyan);
+                    break;
+            }
+            Utils.Pause(400);
+
+            Utils.TypeText("\n  世界得救了，這是事實。", 38);
+            Utils.TypeText("  你一個人做到了——這也是事實。", 38);
+            Utils.TypeText("  在慶祝的人群中，你感到一種奇異的疏離。", 38, ConsoleColor.DarkGray);
+            Utils.TypeText("  「勝利是什麼味道？」", 38, ConsoleColor.DarkGray);
+            Utils.TypeText("  也許，等你找到答案，才算真的完成了這段旅程。", 38);
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("\n\n  ══════════════════════════════════════════════");
+            Console.WriteLine("  GOOD ENDING  ─  孤獨的勝者");
+            Console.WriteLine("  ══════════════════════════════════════════════");
+            Console.ResetColor();
+        }
+
+        private void EndingGood()
+        {
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("\n\n  ══════════════════════════════════════════");
-            Console.WriteLine("  SECRET ENDING  ─  暴走者的覺悟");
-            Console.WriteLine("  🎊 恭喜你發現了隱藏結局！");
-            Console.WriteLine("  ══════════════════════════════════════════");
+            Console.WriteLine();
+            Console.WriteLine("  ╔══════════════════════════════════════════════╗");
+            Console.WriteLine("  ║          好結局：光明的彼岸                  ║");
+            Console.WriteLine("  ╚══════════════════════════════════════════════╝");
+            Console.ResetColor();
+            Utils.Pause(400);
+
+            Utils.TypeText("\n  魔王夜陌魯斯轟然倒地，黑暗之力從世界各角落消散。", 38);
+            Utils.TypeText("  天空緩緩破曉，久違的陽光穿透雲層，照亮大地。", 38);
+            Utils.Pause(300);
+            Utils.TypeText($"\n  {_player.Name} 佇立在魔王城的廢墟上，", 38);
+            Utils.TypeText("  三年的昏迷，三天的旅程，此刻都化為胸中的平靜。", 38);
+            Utils.Pause(300);
+            Utils.TypeText("\n  遠處，村民們向你奔來，歡呼聲響徹雲霄。", 38);
+            Utils.TypeText("  那位老婆婆也在人群中，對你露出感激的微笑。", 38);
+            Utils.Pause(400);
+            Utils.TypeText("\n  「我做到了。」", 38, ConsoleColor.White);
+            Utils.TypeText("  這三個字，你等了三年。", 38);
+            Utils.Pause(300);
+
+            switch (_player.Class)
+            {
+                case PlayerClass.Warrior:
+                    Utils.TypeText("\n  有人問你，接下來要去哪裡。", 38);
+                    Utils.TypeText("  「繼續走吧，」你說，「世界還有更多地方需要守護。」", 38, ConsoleColor.Yellow);
+                    break;
+                case PlayerClass.Mage:
+                    Utils.TypeText("\n  有人問你，那股強大的魔力是怎麼來的。", 38);
+                    Utils.TypeText("  「也許...是來自你們的期待吧。」你微微一笑。", 38, ConsoleColor.Cyan);
+                    break;
+                case PlayerClass.Assassin:
+                    Utils.TypeText("\n  人群中，你沒有站在最前面，", 38);
+                    Utils.TypeText("  但那個角落裡的微笑，是真實的。", 38, ConsoleColor.DarkGray);
+                    break;
+            }
+            Utils.Pause(300);
+
+            Utils.TypeText("\n  至於未來——", 38);
+            Utils.TypeText("  那是另一個故事了。", 38, ConsoleColor.Yellow);
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("\n\n  ══════════════════════════════════════════════");
+            Console.WriteLine("  GOOD ENDING  ─  光明的彼岸");
+            Console.WriteLine("  ══════════════════════════════════════════════");
             Console.ResetColor();
         }
 

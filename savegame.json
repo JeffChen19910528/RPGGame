@@ -1,0 +1,18 @@
+{
+  "PlayerName": "jeff",
+  "Level": 1,
+  "HP": 105,
+  "MaxHP": 105,
+  "MP": 45,
+  "MaxMP": 60,
+  "BaseAttack": 23,
+  "BaseDefense": 8,
+  "EXP": 30,
+  "EXPToNextLevel": 100,
+  "CorruptionLevel": 0,
+  "AcceptedDark": false,
+  "HelpedVillager": true,
+  "BerserkUses": 0,
+  "ClassId": 2,
+  "CurrentChapter": 2
+}
