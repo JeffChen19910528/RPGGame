@@ -114,11 +114,20 @@ namespace RPGGame
             Console.WriteLine(L10n.Get("CREATE_CLASS_1"));
             Console.WriteLine(L10n.Get("CREATE_CLASS_2"));
             Console.WriteLine(L10n.Get("CREATE_CLASS_3"));
+            Console.WriteLine(L10n.Get("CREATE_CLASS_4"));
+            Console.WriteLine(L10n.Get("CREATE_CLASS_5"));
 
-            int cls = Utils.GetChoice(L10n.Get("CREATE_CLASS_SELECT"), 1, 3);
+            int cls = Utils.GetChoice(L10n.Get("CREATE_CLASS_SELECT"), 1, 5);
 
             _player = new Player(name);
-            _player.Class = cls switch { 1 => PlayerClass.Warrior, 2 => PlayerClass.Mage, _ => PlayerClass.Assassin };
+            _player.Class = cls switch
+            {
+                1 => PlayerClass.Warrior,
+                2 => PlayerClass.Mage,
+                3 => PlayerClass.Assassin,
+                4 => PlayerClass.Paladin,
+                _ => PlayerClass.Ranger
+            };
             switch (cls)
             {
                 case 1:
@@ -136,7 +145,19 @@ namespace RPGGame
                     _player.MaxHP -= 10; _player.HP -= 10;
                     Utils.TypeText($"\n  {name} {L10n.Get("INTRO_ASSASSIN")}。", 38, ConsoleColor.DarkGray);
                     break;
+                case 4:
+                    _player.MaxHP += 40; _player.HP += 40;
+                    _player.BaseDefense += 8;
+                    _player.BaseAttack -= 2;
+                    Utils.TypeText($"\n  {name} {L10n.Get("INTRO_PALADIN")}。", 38, ConsoleColor.Yellow);
+                    break;
+                case 5:
+                    _player.BaseAttack += 5;
+                    _player.MaxMP += 20; _player.MP += 20;
+                    Utils.TypeText($"\n  {name} {L10n.Get("INTRO_RANGER")}。", 38, ConsoleColor.DarkGreen);
+                    break;
             }
+            _player.InitClassSkills();
 
             Utils.PressAnyKey();
 
@@ -274,9 +295,10 @@ namespace RPGGame
                 Class             = (PlayerClass)d.ClassId
             };
 
-            // Re-unlock advanced skills if appropriate level
+            // Re-init class skills and unlock advanced if level 3+
+            p.InitClassSkills();
             if (p.Level >= 3)
-                p.Skills.AddRange(SkillSystem.GetAdvancedSkills());
+                p.Skills.AddRange(SkillSystem.GetAdvancedSkills(p.Class));
 
             return p;
         }

@@ -161,5 +161,55 @@ namespace RPGGame
             e.SetSpecial("末日炎焰", 48, 35);
             return e;
         }
+
+        public static Enemy CreateSkeletonArcher()
+        {
+            var e = new Enemy("骷髏弓手", "死亡魔法所驅使的骨骸弓手，空洞的眼眶中透出冰冷的殺意。",
+                hp: 60, atk: 13, def: 1, exp: 58,
+                color: ConsoleColor.Gray);
+            e.SetSpecial("骨箭齊射", 20, 35);
+            return e;
+        }
+
+        public static Enemy CreatePoisonLizard()
+        {
+            var e = new Enemy("毒沼蜥蜴", "棲息在腐敗沼澤中的巨型蜥蜴，皮膚分泌劇毒黏液。",
+                hp: 75, atk: 15, def: 4, exp: 70,
+                color: ConsoleColor.DarkGreen);
+            e.SetSpecial("毒液噴吐", 24, 30);
+            return e;
+        }
+
+        // ── Random Encounter Pools ───────────────────────────────────────────
+
+        public static Enemy GetRandomTier1Enemy(Random rng)
+        {
+            return rng.Next(3) switch
+            {
+                0 => CreateSlime(),
+                1 => CreateSkeletonArcher(),
+                _ => CreateSlime()
+            };
+        }
+
+        public static Enemy GetRandomTier2EnemyA(Random rng)
+        {
+            return rng.Next(3) switch
+            {
+                0 => CreateGoblinKnight(),
+                1 => CreateSkeletonArcher(),
+                _ => CreatePoisonLizard()
+            };
+        }
+
+        public static Enemy GetRandomTier2EnemyB(Random rng)
+        {
+            return rng.Next(3) switch
+            {
+                0 => CreateShadowWraith(),
+                1 => CreatePoisonLizard(),
+                _ => CreateSkeletonArcher()
+            };
+        }
     }
 }

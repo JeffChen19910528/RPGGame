@@ -38,6 +38,8 @@ namespace RPGGame
                 PlayerClass.Warrior  => "  雙手本能地握緊——身體還記得劍的重量。",
                 PlayerClass.Mage     => "  魔力在指尖微微流動，三年沉眠未能將它熄滅。",
                 PlayerClass.Assassin => "  眼睛在黑暗中快速適應，習慣性地掃描每個角落。",
+                PlayerClass.Paladin  => "  胸口一道溫熱的光緩緩流動——神聖的誓約從未真正沉睡。",
+                PlayerClass.Ranger   => "  耳朵靈敏地捕捉著室外的每一個聲響，獵人的本能尚未消退。",
                 _ => ""
             };
             Utils.TypeText(classAwaken, 38, ConsoleColor.DarkGray);
@@ -62,6 +64,18 @@ namespace RPGGame
 
             var result = _battle.StartBattle(Enemy.CreateSlime());
             if (HandleDefeat(result)) return;
+
+            // ── Random roaming encounter ─────────────────────────────────
+            if (_rng.Next(2) == 0)
+            {
+                Console.Clear();
+                Utils.TypeText("\n  繼續趕路時，路旁的陰影中忽然竄出了一個敵影。", 38);
+                Utils.TypeText("  看來這片土地已被黑暗之力徹底感染，妖魔四處遊蕩。", 38);
+                Utils.Pause(300);
+                var roamEnemy = Enemy.GetRandomTier1Enemy(_rng);
+                var roamResult = _battle.StartBattle(roamEnemy);
+                if (HandleDefeat(roamResult)) return;
+            }
 
             // ── Chapter 1 choice ─────────────────────────────────────────
             Console.Clear();
@@ -122,17 +136,17 @@ namespace RPGGame
             Utils.TypeText("  「這裡的一切都被魔王的力量腐化了...」你心想。", 38);
             Utils.Pause(400);
 
-            // ── Battle: Goblin Knight ─────────────────────────────────────
-            Utils.TypeText("\n  一個身著黑鐵盔甲的哥布林騎士擋住了去路，", 38);
-            Utils.TypeText("  「死在這裡吧，人類！」牠嘶吼著，舉起毒矛。", 38, ConsoleColor.Green);
+            // ── Battle: Random mid enemy ──────────────────────────────────
+            var midEnemy1 = Enemy.GetRandomTier2EnemyA(_rng);
+            PrintRandomEncounterIntro(midEnemy1);
             Utils.Pause(300);
 
-            var r1 = _battle.StartBattle(Enemy.CreateGoblinKnight());
+            var r1 = _battle.StartBattle(midEnemy1);
             if (HandleDefeat(r1)) return;
 
             // ── Dark power choice ─────────────────────────────────────────
             Console.Clear();
-            Utils.TypeText("\n  從哥布林騎士的遺骸中，你發現了一塊漆黑的符石。", 38);
+            Utils.TypeText("\n  從敵人的遺骸旁，你發現了一塊漆黑的符石。", 38);
             Utils.TypeText("  它在你手中顫動，散發著既危險又誘人的黑暗力量。", 38);
             Utils.Pause(300);
 
@@ -168,14 +182,13 @@ namespace RPGGame
 
             Utils.PressAnyKey();
 
-            // ── Battle: Shadow Wraith ─────────────────────────────────────
+            // ── Battle: Random deep forest enemy ─────────────────────────
             Console.Clear();
-            Utils.TypeText("\n  深入森林，一個漆黑的靈體從陰影中浮現。", 38);
-            Utils.TypeText("  「你以為能打倒魔王？」幽靈冰冷地低語，", 38, ConsoleColor.DarkGray);
-            Utils.TypeText("  「就連你的憤怒與痛苦，都是他的力量之源。」", 38, ConsoleColor.DarkGray);
+            var midEnemy2 = Enemy.GetRandomTier2EnemyB(_rng);
+            PrintRandomEncounterIntro(midEnemy2);
             Utils.Pause(300);
 
-            var r2 = _battle.StartBattle(Enemy.CreateShadowWraith());
+            var r2 = _battle.StartBattle(midEnemy2);
             if (HandleDefeat(r2)) return;
 
             // ── Berserk hint ──────────────────────────────────────────────
@@ -361,6 +374,16 @@ namespace RPGGame
                 EndingGoodLonely(); return;
             }
 
+            // Class-exclusive open endings
+            if (_player.Class == PlayerClass.Paladin && _player.HelpedVillager && _player.CorruptionLevel <= 1)
+            {
+                EndingPaladinLight(); return;
+            }
+            if (_player.Class == PlayerClass.Ranger && _player.TotalBerserkUses >= 1 && !_player.AcceptedDarkPower)
+            {
+                EndingRangerWild(); return;
+            }
+
             // Good (Light): True hero path
             EndingGood();
         }
@@ -393,6 +416,8 @@ namespace RPGGame
                 PlayerClass.Warrior  => "  人們傳說，那名戰士的劍從未沾染過不義之血。",
                 PlayerClass.Mage     => "  人們傳說，那名法師的魔法之中，帶著光一般的溫度。",
                 PlayerClass.Assassin => "  人們傳說，那名刺客從陰影中走出，卻把陽光帶回了世界。",
+                PlayerClass.Paladin  => "  人們傳說，那名聖騎士的祈禱，讓每一道傷口都癒合了。",
+                PlayerClass.Ranger   => "  人們傳說，那名遊俠的箭矢指向黑暗，從未有一箭射偏過。",
                 _ => ""
             };
             Utils.TypeText($"\n  {classLine}", 38, ConsoleColor.DarkYellow);
@@ -444,6 +469,14 @@ namespace RPGGame
                     Utils.TypeText("\n  從今以後，你在黑暗中行動，", 38, ConsoleColor.Yellow);
                     Utils.TypeText("  但那團怒火，成了你永不熄滅的方向感。", 38, ConsoleColor.Yellow);
                     break;
+                case PlayerClass.Paladin:
+                    Utils.TypeText("\n  從今以後，你的聖光中融入了怒火的熾熱，", 38, ConsoleColor.Yellow);
+                    Utils.TypeText("  那份溫度，是神明賜予的，也是你自己的。", 38, ConsoleColor.Yellow);
+                    break;
+                case PlayerClass.Ranger:
+                    Utils.TypeText("\n  從今以後，你的每一支箭都帶著暴走的速度，", 38, ConsoleColor.Yellow);
+                    Utils.TypeText("  卻始終精準指向那個你選擇守護的方向。", 38, ConsoleColor.Yellow);
+                    break;
             }
             Utils.Pause(300);
 
@@ -494,6 +527,14 @@ namespace RPGGame
                     Utils.TypeText("\n  曾在陰影中守護的那個身影，", 38, ConsoleColor.DarkMagenta);
                     Utils.TypeText("  如今成了陰影本身。", 38, ConsoleColor.DarkMagenta);
                     break;
+                case PlayerClass.Paladin:
+                    Utils.TypeText("\n  曾以聖光守護眾生的誓約，", 38, ConsoleColor.DarkMagenta);
+                    Utils.TypeText("  如今被黑暗徹底燒盡，化為詛咒。", 38, ConsoleColor.DarkMagenta);
+                    break;
+                case PlayerClass.Ranger:
+                    Utils.TypeText("\n  那雙曾指向希望的眼睛，", 38, ConsoleColor.DarkMagenta);
+                    Utils.TypeText("  現在只剩下黑暗與虛無的倒影。", 38, ConsoleColor.DarkMagenta);
+                    break;
             }
             Utils.Pause(400);
 
@@ -542,6 +583,14 @@ namespace RPGGame
                 case PlayerClass.Assassin:
                     Utils.TypeText("\n  陰影一直是你的盟友，", 38);
                     Utils.TypeText("  只是現在，連陰影都開始感到陌生。", 38, ConsoleColor.DarkMagenta);
+                    break;
+                case PlayerClass.Paladin:
+                    Utils.TypeText("\n  聖光的誓言在胸口碎裂如同玻璃，", 38);
+                    Utils.TypeText("  取而代之的，是冰冷的黑暗在那位置燃燒。", 38, ConsoleColor.DarkMagenta);
+                    break;
+                case PlayerClass.Ranger:
+                    Utils.TypeText("\n  那些曾射向黑暗的箭矢，", 38);
+                    Utils.TypeText("  如今轉過了方向，對準了曾守護的人們。", 38, ConsoleColor.DarkMagenta);
                     break;
             }
             Utils.Pause(300);
@@ -601,6 +650,14 @@ namespace RPGGame
                     Utils.TypeText("\n  生活在陰影中的人，最了解灰色的味道，", 38);
                     Utils.TypeText("  但這次嚐到的，比任何時候都深。", 38, ConsoleColor.DarkYellow);
                     break;
+                case PlayerClass.Paladin:
+                    Utils.TypeText("\n  聖光不一定能照亮所有地方，", 38);
+                    Utils.TypeText("  你在這段旅程中學到了，有些東西只能自己背負。", 38, ConsoleColor.DarkYellow);
+                    break;
+                case PlayerClass.Ranger:
+                    Utils.TypeText("\n  遊俠的眼睛向來能看清遠方，", 38);
+                    Utils.TypeText("  但這一次，連自己的內心都看不清楚了。", 38, ConsoleColor.DarkYellow);
+                    break;
             }
             Utils.Pause(400);
 
@@ -648,6 +705,14 @@ namespace RPGGame
                 case PlayerClass.Assassin:
                     Utils.TypeText("\n  刺客的本能是不回頭，不留戀，", 38);
                     Utils.TypeText("  但今天，那種本能讓你感到一種難以名狀的刺痛。", 38, ConsoleColor.Cyan);
+                    break;
+                case PlayerClass.Paladin:
+                    Utils.TypeText("\n  聖騎士的誓言是守護，守護每一個需要幫助的靈魂，", 38);
+                    Utils.TypeText("  但那條路上，你選擇了沉默。這份重量，難以卸下。", 38, ConsoleColor.Cyan);
+                    break;
+                case PlayerClass.Ranger:
+                    Utils.TypeText("\n  遊俠習慣了獨行，習慣了不留痕跡，", 38);
+                    Utils.TypeText("  但這一次的獨行，感覺與往日截然不同。", 38, ConsoleColor.Cyan);
                     break;
             }
             Utils.Pause(400);
@@ -702,6 +767,14 @@ namespace RPGGame
                     Utils.TypeText("\n  人群中，你沒有站在最前面，", 38);
                     Utils.TypeText("  但那個角落裡的微笑，是真實的。", 38, ConsoleColor.DarkGray);
                     break;
+                case PlayerClass.Paladin:
+                    Utils.TypeText("\n  你單膝跪地，向天空默默祈禱。", 38);
+                    Utils.TypeText("  「感謝這份守護的力量——願它長存。」", 38, ConsoleColor.Yellow);
+                    break;
+                case PlayerClass.Ranger:
+                    Utils.TypeText("\n  你摘下弓，靠在肩上，朝著地平線走去。", 38);
+                    Utils.TypeText("  「下一片森林，等著我呢。」你輕聲說。", 38, ConsoleColor.DarkGreen);
+                    break;
             }
             Utils.Pause(300);
 
@@ -711,6 +784,74 @@ namespace RPGGame
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("\n\n  ══════════════════════════════════════════════");
             Console.WriteLine("  GOOD ENDING  ─  光明的彼岸");
+            Console.WriteLine("  ══════════════════════════════════════════════");
+            Console.ResetColor();
+        }
+
+        private void EndingPaladinLight()
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine();
+            Console.WriteLine("  ╔══════════════════════════════════════════════╗");
+            Console.WriteLine("  ║      ✦ 聖騎士結局：聖光的歸途 ✦           ║");
+            Console.WriteLine("  ╚══════════════════════════════════════════════╝");
+            Console.ResetColor();
+            Utils.Pause(400);
+
+            Utils.TypeText("\n  魔王的黑暗在聖光中灰飛煙滅。", 38, ConsoleColor.Yellow);
+            Utils.TypeText("  你的手掌微微顫抖，但那道光，從未熄滅過。", 38);
+            Utils.Pause(300);
+            Utils.TypeText($"\n  {_player.Name} 緩緩轉身，", 38);
+            Utils.TypeText("  那些被魔王腐化的靈魂，在聖光的洗禮中一一得到安息。", 38);
+            Utils.Pause(300);
+            Utils.TypeText("\n  老婆婆拉著你的手，淚眼婆娑：", 38);
+            Utils.TypeText("  「孩子，你不只是英雄——你是神明派來的使者。」", 38, ConsoleColor.Cyan);
+            Utils.Pause(400);
+            Utils.TypeText("\n  你搖搖頭，輕聲說：", 38);
+            Utils.TypeText("  「不，我只是一個不願放棄誓言的人。」", 38, ConsoleColor.White);
+            Utils.Pause(300);
+            Utils.TypeText("\n  聖光在你身後緩緩消散，", 38);
+            Utils.TypeText("  留下的，是治癒的土地，和重新呼吸的人們。", 38);
+            Utils.TypeText("  這，就是聖騎士的歸途。", 38, ConsoleColor.Yellow);
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("\n\n  ══════════════════════════════════════════════");
+            Console.WriteLine("  PALADIN ENDING ✦  ─  聖光的歸途");
+            Console.WriteLine("  ✦ 以信念與聖光完成了屬於聖騎士的旅程！");
+            Console.WriteLine("  ══════════════════════════════════════════════");
+            Console.ResetColor();
+        }
+
+        private void EndingRangerWild()
+        {
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            Console.WriteLine();
+            Console.WriteLine("  ╔══════════════════════════════════════════════╗");
+            Console.WriteLine("  ║      ✦ 遊俠結局：荒野的呼喚 ✦             ║");
+            Console.WriteLine("  ╚══════════════════════════════════════════════╝");
+            Console.ResetColor();
+            Utils.Pause(400);
+
+            Utils.TypeText("\n  最後一箭穿透了黑暗，魔王終於倒下。", 38, ConsoleColor.DarkGreen);
+            Utils.TypeText("  你從暴走的混沌中甦醒，弓弦還在顫抖。", 38);
+            Utils.Pause(300);
+            Utils.TypeText($"\n  {_player.Name} 站在原地，望著四面八方恢復生機的大地。", 38);
+            Utils.TypeText("  風從山林間吹來，帶著泥土和野花的氣息。", 38);
+            Utils.Pause(300);
+            Utils.TypeText("\n  勝利的歡呼聲在遠處響起，但你沒有走過去。", 38);
+            Utils.TypeText("  不是因為冷漠——而是因為，你知道自己屬於哪裡。", 38);
+            Utils.Pause(400);
+            Utils.TypeText("\n  荒野在呼喚你。", 38, ConsoleColor.DarkGreen);
+            Utils.TypeText("  那裡有另一片未知的森林，另一種需要守護的生命。", 38, ConsoleColor.DarkGreen);
+            Utils.Pause(300);
+            Utils.TypeText("\n  你彎弓，朝著那片綠色的遠方，踏出了第一步。", 38);
+            Utils.TypeText("  英雄的故事有很多種結尾。", 38);
+            Utils.TypeText("  這一個，叫做——繼續前行。", 38, ConsoleColor.DarkGreen);
+
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            Console.WriteLine("\n\n  ══════════════════════════════════════════════");
+            Console.WriteLine("  RANGER ENDING ✦  ─  荒野的呼喚");
+            Console.WriteLine("  ✦ 以暴走之力與遊俠之心完成了屬於你的旅程！");
             Console.WriteLine("  ══════════════════════════════════════════════");
             Console.ResetColor();
         }
@@ -744,6 +885,20 @@ namespace RPGGame
         }
 
         // ── Helpers ──────────────────────────────────────────────────────────
+
+        private void PrintRandomEncounterIntro(Enemy enemy)
+        {
+            Console.Clear();
+            string intro = enemy.Name switch
+            {
+                "哥布林騎士"  => "  一個身著黑鐵盔甲的哥布林騎士擋住了去路，「死在這裡吧，人類！」",
+                "骷髏弓手"   => "  一具骷髏從枯木後方竄出，空洞的眼眶射出骨箭！",
+                "毒沼蜥蜴"   => "  一隻巨大的蜥蜴從地底破土而出，口中噴吐著紫色毒液！",
+                "暗影幽靈"   => "  深入森林，一個漆黑的靈體從陰影中浮現，「你以為能打倒魔王？」",
+                _            => $"  一個危險的敵人【{enemy.Name}】突然擋住了你的去路！"
+            };
+            Utils.TypeText($"\n  {intro}", 38, ConsoleColor.DarkGray);
+        }
 
         private bool HandleDefeat(BattleResult result)
         {

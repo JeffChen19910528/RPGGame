@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace RPGGame
 {
     public enum StatusEffect { None, Burn, Stun, Defending }
-    public enum PlayerClass { Warrior, Mage, Assassin }
+    public enum PlayerClass { Warrior, Mage, Assassin, Paladin, Ranger }
 
     public class Equipment
     {
@@ -49,6 +49,8 @@ namespace RPGGame
             PlayerClass.Warrior  => L10n.Get("CLASS_WARRIOR"),
             PlayerClass.Mage     => L10n.Get("CLASS_MAGE"),
             PlayerClass.Assassin => L10n.Get("CLASS_ASSASSIN"),
+            PlayerClass.Paladin  => L10n.Get("CLASS_PALADIN"),
+            PlayerClass.Ranger   => L10n.Get("CLASS_RANGER"),
             _ => L10n.Get("CLASS_HERO")
         };
 
@@ -86,7 +88,12 @@ namespace RPGGame
             EXP = 0;
             EXPToNextLevel = 100;
             CurrentStatus = StatusEffect.None;
-            Skills = SkillSystem.GetStarterSkills();
+            Skills = SkillSystem.GetStarterSkills(PlayerClass.Warrior);
+        }
+
+        public void InitClassSkills()
+        {
+            Skills = SkillSystem.GetStarterSkills(Class);
         }
 
         // ── Berserk ─────────────────────────────────────────────────────────
@@ -176,9 +183,10 @@ namespace RPGGame
 
             if (Level == 3)
             {
-                Skills.AddRange(SkillSystem.GetAdvancedSkills());
+                var advanced = SkillSystem.GetAdvancedSkills(Class);
+                Skills.AddRange(advanced);
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("\n  ✦ 解鎖新技能：【冰霜新星】【大治癒術】！");
+                Console.WriteLine(L10n.Get("SKILL_UNLOCK", advanced[0].Name, advanced[1].Name));
                 Console.ResetColor();
             }
         }
