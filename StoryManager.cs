@@ -65,6 +65,9 @@ namespace RPGGame
             var result = _battle.StartBattle(Enemy.CreateSlime());
             if (HandleDefeat(result)) return;
 
+            PlayFunnySidequest_SlimeLord();
+            if (GameOverTriggered) return;
+
             // ── Random roaming encounter ─────────────────────────────────
             if (_rng.Next(2) == 0)
             {
@@ -182,6 +185,9 @@ namespace RPGGame
 
             Utils.PressAnyKey();
 
+            PlayFunnySidequest_LostMinion();
+            if (GameOverTriggered) return;
+
             // ── Battle: Random deep forest enemy ─────────────────────────
             Console.Clear();
             var midEnemy2 = Enemy.GetRandomTier2EnemyB(_rng);
@@ -261,6 +267,9 @@ namespace RPGGame
             }
 
             Utils.PressAnyKey();
+
+            PlayFunnySidequest_DemonCafeteria();
+            if (GameOverTriggered) return;
 
             // ── Final choice ──────────────────────────────────────────────
             Console.Clear();
@@ -895,9 +904,246 @@ namespace RPGGame
                 "骷髏弓手"   => "  一具骷髏從枯木後方竄出，空洞的眼眶射出骨箭！",
                 "毒沼蜥蜴"   => "  一隻巨大的蜥蜴從地底破土而出，口中噴吐著紫色毒液！",
                 "暗影幽靈"   => "  深入森林，一個漆黑的靈體從陰影中浮現，「你以為能打倒魔王？」",
+                "水晶蜘蛛"   => "  枯木縫隙中鑽出一隻水晶蜘蛛，透明的身軀折射出詭異的光！",
+                "吸血蝙蝠群" => "  樹冠上騰起一片黑影——大批吸血蝙蝠如浪潮般俯衝而下！",
+                "冰霜女巫"   => "  霧氣中緩緩走出一名蒼老的女巫，手中冰晶旋轉發光，「你來送死了？」",
+                "憤怒石像"   => "  地面突然震動，苔蘚碎裂間，一尊巨大石像緩緩站起，眼中迸出怒火！",
+                "腐化樹妖"   => "  身旁最高的那棵樹忽然扭動，齜牙裂嘴向你撲來，根鬚如鞭橫掃！",
                 _            => $"  一個危險的敵人【{enemy.Name}】突然擋住了你的去路！"
             };
             Utils.TypeText($"\n  {intro}", 38, ConsoleColor.DarkGray);
+        }
+
+        // ════════════════════════════════════════════════════════════════════
+        // FUNNY SIDEQUESTS ── 幽默支線劇情
+        // ════════════════════════════════════════════════════════════════════
+
+        private void PlayFunnySidequest_SlimeLord()
+        {
+            Console.Clear();
+            Utils.TypeText("\n  你剛打完史萊姆，繼續往前走了幾步。", 38);
+            Utils.TypeText("  路中間，又站著一隻史萊姆。", 38);
+            Utils.Pause(300);
+            Utils.TypeText("  但這隻不太一樣。", 38);
+            Utils.Pause(400);
+            Utils.TypeText("  牠頭上頂著一個用枯葉折成的小王冠，", 38);
+            Utils.TypeText("  面前插著一塊木牌，用爪痕歪歪扭扭地刻著：", 38);
+            Utils.Pause(200);
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("\n  ┌───────────────────────────────┐");
+            Console.WriteLine("  │  此路通行費：1 金幣           │");
+            Console.WriteLine("  │  本大爺乃上古龍王轉世         │");
+            Console.WriteLine("  │  違者格殺勿論                 │");
+            Console.WriteLine("  └───────────────────────────────┘");
+            Console.ResetColor();
+            Utils.TypeText("\n  牠沒有手。", 38, ConsoleColor.DarkGray);
+            Utils.Pause(400);
+
+            Utils.PrintTitle("你 要 怎 麼 做");
+            Console.WriteLine("  [1] 「你連手都沒有，怎麼『格殺勿論』？」（迎戰）");
+            Console.WriteLine("  [2] 「好吧...就當捐款了。」（付出 5 HP）");
+            Console.WriteLine("  [3] 「龍王轉世？說來聽聽。」");
+
+            int c = Utils.GetChoice("你的選擇", 1, 3);
+
+            if (c == 1)
+            {
+                Utils.TypeText("\n  史萊姆沉默了一秒，然後開始劇烈顫抖。", 38);
+                Utils.TypeText("  「...你找死！本大爺全力以赴！」", 38, ConsoleColor.Yellow);
+                Utils.Pause(300);
+                var r = _battle.StartBattle(Enemy.CreateSlime());
+                if (HandleDefeat(r)) return;
+                Utils.TypeText("\n  王冠在地上滾了幾圈，停在你腳邊。", 38, ConsoleColor.DarkGray);
+                Utils.TypeText("  「原來...龍王的第九條命...也不過如此...」", 38, ConsoleColor.DarkGray);
+            }
+            else if (c == 2)
+            {
+                _player.HP = Math.Max(1, _player.HP - 5);
+                Utils.TypeText("\n  你象徵性地往牠面前放了一塊小石頭。", 38);
+                Utils.TypeText("  史萊姆盯著石頭看了三秒，開心地晃動了一下。", 38, ConsoleColor.Yellow);
+                Utils.TypeText("  「哼，識時務！本大爺賜你通行。」", 38, ConsoleColor.Yellow);
+                Utils.TypeText("  然後牠吐出一顆藍色的圓珠，彈到你腳邊。", 38);
+                Utils.TypeText("  「龍族的禮物，拿去吧，凡人。」", 38, ConsoleColor.Yellow);
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("\n  ✦ 獲得「龍珠（偽）」── 恢復 20 MP");
+                Console.ResetColor();
+                _player.MP = Math.Min(_player.MaxMP, _player.MP + 20);
+            }
+            else
+            {
+                Utils.TypeText("\n  史萊姆挺了挺王冠，清了清喉嚨（不確定牠有沒有喉嚨）。", 38);
+                Utils.TypeText("  「本大爺三千年前是九頭火龍，因得罪天道被詛咒轉世...」", 38, ConsoleColor.Yellow);
+                Utils.Pause(200);
+                Utils.TypeText("  「我本來有九條命，」牠說，語氣突然低沉，「現在...」", 38, ConsoleColor.Yellow);
+                Utils.Pause(400);
+                Utils.TypeText("  「...只剩一條了。不然我早揍你了！」", 38, ConsoleColor.Yellow);
+                Utils.Pause(200);
+                Utils.TypeText("  「所以你選擇在路邊收費？」你問。", 38);
+                Utils.TypeText("  「生活所迫！你見過史萊姆成功求職的嗎！」", 38, ConsoleColor.Yellow);
+                Utils.Pause(400);
+                Utils.TypeText("\n  你同情地點了點頭，掏出一塊乾糧放在木牌前。", 38);
+                Utils.TypeText("  「...謝謝。」史萊姆沉默片刻，小聲說。", 38, ConsoleColor.Yellow);
+                Utils.Pause(200);
+                Utils.TypeText("  「對了，魔王城在東邊。別說是我告訴你的。」", 38, ConsoleColor.DarkGray);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("\n  ✦ 善良之心：恢復 10 HP");
+                Console.ResetColor();
+                _player.HP = Math.Min(_player.MaxHP, _player.HP + 10);
+            }
+
+            Utils.PressAnyKey();
+        }
+
+        private void PlayFunnySidequest_LostMinion()
+        {
+            Console.Clear();
+            Utils.TypeText("\n  深入森林，你聽到灌木叢後有動靜。", 38);
+            Utils.TypeText("  不是獸的腳步，而是......抱怨聲？", 38);
+            Utils.Pause(300);
+            Utils.TypeText("  「向右...不對...向左...這破地圖根本看不懂啊啊啊！」", 38, ConsoleColor.DarkRed);
+            Utils.Pause(200);
+            Utils.TypeText("  你撥開草叢，發現一個頭戴彎角頭盔的小惡魔，", 38);
+            Utils.TypeText("  正對著一張皺巴巴的地圖抓耳撓腮，完全沒發現你。", 38);
+            Utils.TypeText("  牠手上還提著一個冒熱氣的飯盒，上面貼著：", 38);
+            Utils.Pause(200);
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine("\n  「魔王大人的午餐 ── 請勿轉交給勇者」");
+            Console.ResetColor();
+            Utils.Pause(400);
+
+            Utils.PrintTitle("你 要 怎 麼 做");
+            Console.WriteLine("  [1] 「你在找什麼地方？」（搭話）");
+            Console.WriteLine("  [2] 悄悄繞過去（別惹麻煩）");
+            Console.WriteLine("  [3] 直接打倒牠");
+
+            int c = Utils.GetChoice("你的選擇", 1, 3);
+
+            if (c == 1)
+            {
+                Utils.TypeText("\n  小惡魔一臉感激地轉向你：「你知道魔王城怎麼走嗎！」", 38, ConsoleColor.DarkRed);
+                Utils.TypeText("  「我在這個森林轉了三個小時了！老大的午飯都涼了！」", 38, ConsoleColor.DarkRed);
+                Utils.Pause(200);
+                Utils.TypeText("  你朝東邊指了指。（這也是你要去的方向。）", 38);
+                Utils.TypeText("  「謝謝！你真是個好人！這個給你！」", 38, ConsoleColor.DarkRed);
+                Utils.TypeText("  牠從腰間掏出一個備用飯盒塞到你手裡，轉身狂奔。", 38);
+                Utils.Pause(400);
+                Utils.TypeText("  跑了五步，牠突然停下來，緩緩回頭。", 38);
+                Utils.Pause(600);
+                Utils.TypeText("  「......等等。」", 38, ConsoleColor.DarkRed);
+                Utils.TypeText("  「你......是人類？」", 38, ConsoleColor.DarkRed);
+                Utils.TypeText("  「你......拿著武器？」", 38, ConsoleColor.DarkRed);
+                Utils.Pause(300);
+                Utils.TypeText("  「你......是那個傳說中的勇者？！」", 38, ConsoleColor.DarkRed);
+                Utils.Pause(300);
+                Utils.TypeText("  小惡魔發出一聲撕心裂肺的慘叫，以你從未見過的速度消失在森林深處。", 38);
+                Utils.TypeText("  只留下一陣「老大我不去送午餐了啊啊啊」的迴響。", 38, ConsoleColor.DarkGray);
+                Utils.Pause(400);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("\n  ✦ 獲得「魔族備用飯盒」── 恢復 35 HP");
+                Console.ResetColor();
+                _player.HP = Math.Min(_player.MaxHP, _player.HP + 35);
+            }
+            else if (c == 2)
+            {
+                Utils.TypeText("\n  你小心翼翼地側身繞過草叢，幾乎成功了。", 38);
+                Utils.Pause(500);
+                Utils.TypeText("  然後你踩到一根樹枝。", 38, ConsoleColor.DarkGray);
+                Utils.Pause(400);
+                Utils.TypeText("  「咦？那是......人類？！救命啊啊啊！」", 38, ConsoleColor.DarkRed);
+                Utils.TypeText("  小惡魔扔下飯盒，以光速逃離。", 38);
+                Utils.TypeText("  飯盒滾到你腳邊，蓋子彈開，熱氣升騰。", 38);
+                Utils.Pause(300);
+                Utils.TypeText("  你看了看四周，撿起來吃了。", 38);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("\n  ✦ 撿到「魔王的午餐（涼了）」── 恢復 20 HP");
+                Console.ResetColor();
+                _player.HP = Math.Min(_player.MaxHP, _player.HP + 20);
+            }
+            else
+            {
+                Utils.TypeText("\n  小惡魔還沒看到你，就被打倒在地。", 38);
+                Utils.TypeText("  倒地之際，牠嘟囔了一句：", 38);
+                Utils.TypeText("  「...午飯...沒送到...老大一定會扣我薪水的...」", 38, ConsoleColor.DarkGray);
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine("\n  ✦ 獲得「戰利品午餐」── 恢復 15 HP");
+                Console.WriteLine("  ※ 腐化值 +1（打倒一個毫無威脅的外送員，有點說不過去）");
+                Console.ResetColor();
+                _player.HP = Math.Min(_player.MaxHP, _player.HP + 15);
+                _player.CorruptionLevel++;
+            }
+
+            Utils.PressAnyKey();
+        }
+
+        private void PlayFunnySidequest_DemonCafeteria()
+        {
+            Console.Clear();
+            Utils.TypeText("\n  走入魔王城內部，走廊深處飄來了......香噴噴的食物味？", 38);
+            Utils.Pause(400);
+            Utils.TypeText("  你推開一扇偏門，發現三名魔族士兵圍著小桌喝湯，", 38);
+            Utils.TypeText("  正在大聲抱怨。", 38);
+            Utils.Pause(200);
+            Utils.TypeText("  「魔王大人今天又發火了！說我巡邏時間到了還在摸魚！」", 38, ConsoleColor.DarkRed);
+            Utils.TypeText("  「誰叫你巡邏時偷偷看那個人類頻道...」", 38, ConsoleColor.DarkRed);
+            Utils.TypeText("  「那個勇者三年後才來，這班根本無聊到要命！」", 38, ConsoleColor.DarkRed);
+            Utils.Pause(400);
+            Utils.TypeText("  三個魔族一回頭，和你四目相交。", 38);
+            Utils.Pause(600);
+            Utils.TypeText("  沉默。", 38, ConsoleColor.DarkGray);
+            Utils.Pause(500);
+
+            Utils.PrintTitle("你 要 怎 麼 做");
+            Console.WriteLine("  [1] 「繼續，當我沒來。」（不打擾）");
+            Console.WriteLine("  [2] 「你們魔王在哪裡？」（套話）");
+            Console.WriteLine("  [3] 「巡邏的就該盡職！」（迎戰）");
+
+            int c = Utils.GetChoice("你的選擇", 1, 3);
+
+            if (c == 1)
+            {
+                Utils.TypeText("\n  你轉身準備離開。", 38);
+                Utils.TypeText("  身後低聲傳來：「...勇者不打我們？」「別動。」「裝死。」", 38, ConsoleColor.DarkGray);
+                Utils.Pause(300);
+                Utils.TypeText("  你走到門口，一碗熱湯悄悄推了過來。", 38);
+                Utils.TypeText("  你回頭，三個魔族立刻望向天花板，吹口哨。", 38, ConsoleColor.DarkRed);
+                Utils.Pause(300);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("\n  ✦ 獲得「魔族大鍋湯」── 恢復 40 HP 和 20 MP");
+                Console.ResetColor();
+                _player.HP = Math.Min(_player.MaxHP, _player.HP + 40);
+                _player.MP = Math.Min(_player.MaxMP, _player.MP + 20);
+            }
+            else if (c == 2)
+            {
+                Utils.TypeText("  三個魔族同時開口：「在最頂層！」「在地下室！」「在廁所！」", 38, ConsoleColor.DarkRed);
+                Utils.TypeText("  三人互看一眼：「哪個對？」「我不確定！」「你說什麼？！」", 38, ConsoleColor.DarkRed);
+                Utils.Pause(300);
+                Utils.TypeText("  混亂之中，一個魔族悄悄對你耳語：", 38);
+                Utils.TypeText("  「最頂層，一直走就到了。今天在氣頭上，小心。」", 38, ConsoleColor.DarkRed);
+                Utils.TypeText("  然後大喊：「撤退！勇者來了！」三人落荒而逃。", 38);
+                Utils.Pause(200);
+                Utils.TypeText("  桌上的湯還熱著。你端起來喝了。", 38);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("\n  ✦ 獲得「情報 + 廢棄的湯」── 恢復 25 HP");
+                Console.ResetColor();
+                _player.HP = Math.Min(_player.MaxHP, _player.HP + 25);
+            }
+            else
+            {
+                Utils.TypeText("\n  「好吧好吧！打就打！反正薪水也不夠！」", 38, ConsoleColor.DarkRed);
+                Utils.TypeText("  三個魔族磨磨蹭蹭站起來，拿起武器。", 38);
+                Utils.TypeText("  「等等，我湯還沒喝完——」「先打架！」「........」", 38, ConsoleColor.DarkGray);
+                Utils.Pause(300);
+                var r = _battle.StartBattle(Enemy.CreateDemonSoldier());
+                if (HandleDefeat(r)) return;
+                Utils.TypeText("\n  三個魔族狼狽逃竄，其中一個還抱走了湯碗。", 38, ConsoleColor.DarkGray);
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine("  ※ 腐化值 +1（魔族打工仔在氣頭上也是人……算了，是魔族）");
+                Console.ResetColor();
+                _player.CorruptionLevel++;
+            }
+
+            Utils.PressAnyKey();
         }
 
         private bool HandleDefeat(BattleResult result)

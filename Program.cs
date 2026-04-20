@@ -17,6 +17,12 @@ namespace RPGGame
             }
             catch { /* Ignore if terminal doesn't support resizing */ }
 
+            if (args.Length > 0 && args[0] == "--test")
+            {
+                GameTests.RunAll();
+                return;
+            }
+
             var game = new GameManager();
             game.Run();
 

@@ -180,15 +180,70 @@ namespace RPGGame
             return e;
         }
 
+        public static Enemy CreateCrystalSpider()
+        {
+            var e = new Enemy("水晶蜘蛛", "身體由半透明水晶構成的詭異蜘蛛，每踏一步都發出清脆的碎裂聲。",
+                hp: 55, atk: 11, def: 2, exp: 48,
+                color: ConsoleColor.Cyan);
+            e.SetSpecial("水晶碎射", 20, 30);
+            return e;
+        }
+
+        public static Enemy CreateVampireBatSwarm()
+        {
+            var e = new Enemy("吸血蝙蝠群", "數十隻被魔力感染的蝙蝠集結成群，翅膀拍動聲如同死亡的鼓點。",
+                hp: 50, atk: 10, def: 1, exp: 40,
+                color: ConsoleColor.DarkGray);
+            e.SetSpecial("群體吸血", 18, 35);
+            return e;
+        }
+
+        public static Enemy CreateFrostWitch()
+        {
+            var e = new Enemy("冰霜女巫", "在暗黑森林深處修行的老巫婆，嘴角永遠掛著令人不寒而慄的笑。",
+                hp: 80, atk: 17, def: 3, exp: 82,
+                color: ConsoleColor.Blue);
+            e.SetSpecial("冰凍咒術", 28, 30);
+            return e;
+        }
+
+        public static Enemy CreateAngryGolem()
+        {
+            var e = new Enemy("憤怒石像", "被魔王怨念喚醒的廢棄神殿守衛，每一步都讓大地顫抖。",
+                hp: 120, atk: 20, def: 8, exp: 95,
+                color: ConsoleColor.DarkYellow);
+            e.SetSpecial("石拳暴砸", 32, 25);
+            return e;
+        }
+
+        public static Enemy CreateCorruptedTreant()
+        {
+            var e = new Enemy("腐化樹妖", "曾是守護森林的古老樹靈，被黑暗之力腐化，成了憤怒的怪物。",
+                hp: 95, atk: 16, def: 6, exp: 88,
+                color: ConsoleColor.DarkGreen);
+            e.SetSpecial("毒藤纏繞", 25, 28);
+            return e;
+        }
+
+        public static Enemy CreateDemonSoldier()
+        {
+            var e = new Enemy("魔族哨兵", "魔王城的普通守衛，剛才還在喝湯，現在被迫作戰，表情十分委屈。",
+                hp: 65, atk: 12, def: 3, exp: 55,
+                color: ConsoleColor.DarkRed);
+            e.SetSpecial("慌亂攻擊", 18, 25);
+            return e;
+        }
+
         // ── Random Encounter Pools ───────────────────────────────────────────
 
         public static Enemy GetRandomTier1Enemy(Random rng)
         {
-            return rng.Next(3) switch
+            return rng.Next(4) switch
             {
                 0 => CreateSlime(),
                 1 => CreateSkeletonArcher(),
-                _ => CreateSlime()
+                2 => CreateCrystalSpider(),
+                _ => CreateVampireBatSwarm()
             };
         }
 
@@ -197,7 +252,7 @@ namespace RPGGame
             return rng.Next(3) switch
             {
                 0 => CreateGoblinKnight(),
-                1 => CreateSkeletonArcher(),
+                1 => CreateFrostWitch(),
                 _ => CreatePoisonLizard()
             };
         }
@@ -207,8 +262,8 @@ namespace RPGGame
             return rng.Next(3) switch
             {
                 0 => CreateShadowWraith(),
-                1 => CreatePoisonLizard(),
-                _ => CreateSkeletonArcher()
+                1 => CreateCorruptedTreant(),
+                _ => CreateAngryGolem()
             };
         }
     }
