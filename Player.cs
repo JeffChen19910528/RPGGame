@@ -189,6 +189,15 @@ namespace RPGGame
                 Console.WriteLine(L10n.Get("SKILL_UNLOCK", advanced[0].Name, advanced[1].Name));
                 Console.ResetColor();
             }
+
+            if (Level == GameConstants.UltraSkillLevel)
+            {
+                var ultra = SkillSystem.GetUltraSkills(Class);
+                Skills.AddRange(ultra);
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine(L10n.Get("SKILL_UNLOCK_ULTRA", ultra[0].Name));
+                Console.ResetColor();
+            }
         }
 
         // ── Equip ───────────────────────────────────────────────────────────

@@ -231,6 +231,27 @@ namespace RPGGame
             Utils.TypeText("\n  魔王城就在眼前，黑色的尖塔刺穿陰雲密布的天空。", 38);
             Utils.TypeText("  城門大開，彷彿在靜靜等待著你的到來。", 38);
             Utils.Pause(300);
+
+            // ── Graveyard random encounter (new) ──────────────────────────
+            Console.Clear();
+            AnimationSystem.ShowChapterScene(4);
+            Utils.TypeText("\n  踏過亡者荒野，無數倒在三年前戰役中的靈魂仍未安息。", 38);
+            Utils.TypeText("  黑暗能量在這片焦土上凝聚，化為強大的敵人。", 38);
+            Utils.Pause(300);
+
+            var tier3Enemy = Enemy.GetRandomTier3Enemy(_rng);
+            PrintRandomEncounterIntro(tier3Enemy);
+            Utils.Pause(300);
+
+            var r3 = _battle.StartBattle(tier3Enemy);
+            if (HandleDefeat(r3)) return;
+
+            Console.Clear();
+            Utils.TypeText("\n  敵人消散後，荒野重歸寂靜。", 38);
+            Utils.TypeText("  你抬頭，魔王城的黑色城牆已近在眼前。", 38);
+            Utils.Pause(400);
+            Utils.PressAnyKey();
+
             Utils.TypeText("\n  城門前，一名身著精緻黑甲的騎士緩緩轉身。", 38);
             Utils.TypeText("  「我曾是這個王國最偉大的聖騎士。」", 38, ConsoleColor.DarkRed);
             Utils.TypeText("  「如今...我是魔王手中最鋒利的劍。」", 38, ConsoleColor.DarkRed);
@@ -269,6 +290,9 @@ namespace RPGGame
             Utils.PressAnyKey();
 
             PlayFunnySidequest_DemonCafeteria();
+            if (GameOverTriggered) return;
+
+            PlayFunnySidequest_CursedMirror();
             if (GameOverTriggered) return;
 
             // ── Final choice ──────────────────────────────────────────────
@@ -909,6 +933,10 @@ namespace RPGGame
                 "冰霜女巫"   => "  霧氣中緩緩走出一名蒼老的女巫，手中冰晶旋轉發光，「你來送死了？」",
                 "憤怒石像"   => "  地面突然震動，苔蘚碎裂間，一尊巨大石像緩緩站起，眼中迸出怒火！",
                 "腐化樹妖"   => "  身旁最高的那棵樹忽然扭動，齜牙裂嘴向你撲來，根鬚如鞭橫掃！",
+                "石化蛇王"   => "  大地龜裂，一條披掛石鱗的巨蛇從地縫中盤旋而出，雙眼散發詭異的石化光芒！",
+                "深淵惡魔"   => "  空氣驟然降溫，虛空撕裂——一隻漆黑的惡魔張開雙翼，遮蔽了頭頂所有的光！",
+                "幽靈騎士"   => "  霧中浮現出一道幽藍的人影，殘破的鎧甲與利刃若隱若現，「...你也想加入我嗎？」",
+                "腐化主教"   => "  一個身著腐化法衣的老者緩步走來，手杖上刻滿黑色符文，「讓我替你超渡吧，孩子。」",
                 _            => $"  一個危險的敵人【{enemy.Name}】突然擋住了你的去路！"
             };
             Utils.TypeText($"\n  {intro}", 38, ConsoleColor.DarkGray);
@@ -1141,6 +1169,91 @@ namespace RPGGame
                 Console.WriteLine("  ※ 腐化值 +1（魔族打工仔在氣頭上也是人……算了，是魔族）");
                 Console.ResetColor();
                 _player.CorruptionLevel++;
+            }
+
+            Utils.PressAnyKey();
+        }
+
+        private void PlayFunnySidequest_CursedMirror()
+        {
+            Console.Clear();
+            Utils.TypeText("\n  走廊深處，一面巨大的黑色鏡子靠牆而立。", 38);
+            Utils.TypeText("  鏡面泛著幽幽紫光，上方刻著：", 38);
+            Utils.Pause(300);
+            Console.ForegroundColor = ConsoleColor.DarkMagenta;
+            Console.WriteLine("\n  ┌─────────────────────────────────┐");
+            Console.WriteLine("  │   「魔王の詛咒之鏡」            │");
+            Console.WriteLine("  │   凝視者將獲得前途的啟示        │");
+            Console.WriteLine("  │   （旁邊小字：概不負責）        │");
+            Console.WriteLine("  └─────────────────────────────────┘");
+            Console.ResetColor();
+            Utils.Pause(400);
+            Utils.TypeText("  鏡子好像在等你說話。", 38, ConsoleColor.DarkGray);
+            Utils.Pause(300);
+
+            Utils.PrintTitle("你 要 怎 麼 做");
+            Console.WriteLine("  [1] 「你能告訴我最終決戰的結果嗎？」");
+            Console.WriteLine("  [2] 「我的未來會幸福嗎？」");
+            Console.WriteLine("  [3] 砸破鏡子，什麼都不問");
+
+            int c = Utils.GetChoice("你的選擇", 1, 3);
+
+            if (c == 1)
+            {
+                Utils.TypeText("\n  鏡面光芒一閃，出現文字：", 38);
+                Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                Utils.Pause(400);
+                Utils.TypeText("  「你將面對魔王。」", 38, ConsoleColor.DarkMagenta);
+                Utils.Pause(300);
+                Utils.TypeText("  「你要麼贏，要麼輸。」", 38, ConsoleColor.DarkMagenta);
+                Utils.Pause(400);
+                Utils.TypeText("  「此預言百分百準確。」", 38, ConsoleColor.DarkMagenta);
+                Console.ResetColor();
+                Utils.Pause(400);
+                Utils.TypeText("\n  「......謝謝你的廢話。」你說。", 38);
+                Utils.TypeText("  鏡子反射出一個你說不清是傲慢還是尷尬的表情。", 38, ConsoleColor.DarkGray);
+                Utils.Pause(300);
+                Utils.TypeText("  不過你注意到鏡框縫隙裡夾著一塊乾糧。", 38);
+                Utils.TypeText("  大概是上一個來問的人留下的。", 38, ConsoleColor.DarkGray);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("\n  ✦ 獲得「廢話預言的安慰獎」── 恢復 15 HP");
+                Console.ResetColor();
+                _player.HP = Math.Min(_player.MaxHP, _player.HP + 15);
+            }
+            else if (c == 2)
+            {
+                Utils.TypeText("\n  鏡面沉默了很長一段時間。", 38);
+                Utils.Pause(800);
+                Utils.TypeText("  長到你以為它當機了。", 38, ConsoleColor.DarkGray);
+                Utils.Pause(600);
+                Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                Utils.TypeText("\n  「......這個問題超出本鏡子的計算範圍。」", 38, ConsoleColor.DarkMagenta);
+                Utils.TypeText("  「請洽詢人生導師、算命師或鄰居大媽。」", 38, ConsoleColor.DarkMagenta);
+                Console.ResetColor();
+                Utils.Pause(300);
+                Utils.TypeText("\n  你覺得這面鏡子很誠實。", 38);
+                Utils.TypeText("  鏡面忽然泛出一道溫和的光，落在你身上。", 38);
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("\n  ✦ 誠實的詛咒之鏡──恢復 20 HP 和 15 MP");
+                Console.ResetColor();
+                _player.HP = Math.Min(_player.MaxHP, _player.HP + 20);
+                _player.MP = Math.Min(_player.MaxMP, _player.MP + 15);
+            }
+            else
+            {
+                Utils.TypeText("\n  你抄起武器，一擊砸碎了鏡子。", 38);
+                Utils.Pause(200);
+                Utils.TypeText("  碎片散落一地，其中一塊反射出你自己的臉。", 38, ConsoleColor.DarkGray);
+                Utils.Pause(400);
+                Utils.TypeText("  那個表情——", 38, ConsoleColor.DarkGray);
+                Utils.Pause(600);
+                Utils.TypeText("  你決定不深究。", 38, ConsoleColor.DarkGray);
+                Utils.Pause(300);
+                Utils.TypeText("  碎鏡中飄出一縷銀光，落在你的武器上。", 38);
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("\n  ✦ 打碎鏡子的勇氣──ATK 暫時+2（魔王城內有效）");
+                Console.ResetColor();
+                _player.BaseAttack += 2;
             }
 
             Utils.PressAnyKey();

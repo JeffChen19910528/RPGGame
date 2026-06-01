@@ -305,6 +305,190 @@ namespace RPGGame
             "  ~~~~~~~~~~~~~~~     ",
         };
 
+        // ── SERPENT KING (22 wide) ───────────────────────────────────────────
+
+        public static readonly string[] SerpentNormal =
+        {
+            "   ~*[=III=]*~        ",
+            "  / (o     o) \\      ",
+            "  \\ ( ~v~~~ ) /      ",
+            "   )~~~~~~~~~~(       ",
+            "  (~~~~~~~~~~~~)      ",
+            "  ~~~~~~~~~~~~~~~~~   ",
+            "     ~~~   ~~~        ",
+        };
+
+        public static readonly string[] SerpentAttack =
+        {
+            "   ~*[=III=]*~        ",
+            "<-/ (o     o) \\      ",
+            "  \\ ( ~v~~~ ) /      ",
+            "   )~~~~~~~~~~(       ",
+            "  (~~~~~~~~~~~~)      ",
+            "  ~~~~~~~~~~~~~~~~~   ",
+            "     ~~~   ~~~        ",
+        };
+
+        public static readonly string[] SerpentHurt =
+        {
+            "  *~*[=III=]*~*       ",
+            "  / (x     x) \\      ",
+            "  \\ ( -~-~- ) /      ",
+            "   )~~~~~~~~~~(       ",
+            "  (~~~~~~~~~~~~)      ",
+            "  ~~~~~~~~~~~~~~~~~   ",
+            "     ~~~   ~~~        ",
+        };
+
+        public static readonly string[] SerpentDead =
+        {
+            "                      ",
+            "  __~*[=III=]*~__     ",
+            "  / (-.    .-) \\     ",
+            "  ~~~~~~~~~~~~~~~~~   ",
+            "  ~~~~~~~~~~~~~~~~~   ",
+            "  ~~~  ~~~~~  ~~~     ",
+            "                      ",
+        };
+
+        // ── ABYSS DEMON (22 wide) ────────────────────────────────────────────
+
+        public static readonly string[] AbyssDemonNormal =
+        {
+            " \\     ~~~     /      ",
+            "  \\Y (o   o) Y/      ",
+            "  (  | >-< |  )       ",
+            "  \\  |=====|  /      ",
+            "  /  |=====|  \\      ",
+            " /   / ||| \\   \\    ",
+            "     ~~   ~~          ",
+        };
+
+        public static readonly string[] AbyssDemonAttack =
+        {
+            " \\     ~~~     /      ",
+            "  \\Y (o   o) Y/      ",
+            "<-(  | >-< |  )       ",
+            "  \\  |=====|  /      ",
+            "  /  |=====|  \\      ",
+            " /   / ||| \\   \\    ",
+            "     ~~   ~~          ",
+        };
+
+        public static readonly string[] AbyssDemonHurt =
+        {
+            "*\\     ~~~     /*     ",
+            "  \\Y (x   x) Y/      ",
+            "  (  | --- |  )       ",
+            "  \\  |=====|  /      ",
+            "  /  |=====|  \\      ",
+            " /   / ||| \\   \\    ",
+            "     ~~   ~~          ",
+        };
+
+        public static readonly string[] AbyssDemonDead =
+        {
+            "                      ",
+            "   \\Y       Y/        ",
+            "    ( -   - )         ",
+            "  ~~~|=====|~~~       ",
+            "  ~~~~~~~~~~~~~       ",
+            "  ~~~~~~~~~~~~~       ",
+            "                      ",
+        };
+
+        // ── PHANTOM KNIGHT (22 wide) ─────────────────────────────────────────
+
+        public static readonly string[] PhantomNormal =
+        {
+            "   ~~[=^=]~~          ",
+            "   ~ |> <| ~          ",
+            "   ~ [===] ~          ",
+            "  ~~/|   |\\~~        ",
+            "  ~/       \\~        ",
+            "  ~/   |   \\~        ",
+            "  ~~   |   ~~         ",
+        };
+
+        public static readonly string[] PhantomAttack =
+        {
+            "   ~~[=^=]~~          ",
+            "   ~ |> <| ~          ",
+            "   ~ [===] ~          ",
+            "<-~~/|   |\\~~        ",
+            "  ~/       \\~        ",
+            "  ~/   |   \\~        ",
+            "  ~~   |   ~~         ",
+        };
+
+        public static readonly string[] PhantomHurt =
+        {
+            "  *~~[=^=]~~*         ",
+            "   ~ |x  x| ~         ",
+            "   ~ [===] ~          ",
+            "  ~~/|   |\\~~        ",
+            "  ~/       \\~        ",
+            "  ~/   |   \\~        ",
+            "  ~~   |   ~~         ",
+        };
+
+        public static readonly string[] PhantomDead =
+        {
+            "                      ",
+            "  ....~~[=^=]..       ",
+            "  . ~ |-..-| ~.       ",
+            "  . ~ [===] ~.        ",
+            "  ..............      ",
+            "   ............       ",
+            "                      ",
+        };
+
+        // ── CORRUPTED BISHOP (22 wide) ───────────────────────────────────────
+
+        public static readonly string[] BishopNormal =
+        {
+            "      /|\\             ",
+            "     /[+]\\            ",
+            "    / |+| \\           ",
+            "   [++++++]           ",
+            "   |  )  ( |          ",
+            "   | /    \\|          ",
+            "   |/______\\|         ",
+        };
+
+        public static readonly string[] BishopAttack =
+        {
+            "      /|\\             ",
+            "     /[+]\\            ",
+            "    / |+| \\           ",
+            "<--[++++++]           ",
+            "   |  )  ( |          ",
+            "   | /    \\|          ",
+            "   |/______\\|         ",
+        };
+
+        public static readonly string[] BishopHurt =
+        {
+            "    * /|\\ *           ",
+            "     /[x]\\            ",
+            "    / |+| \\           ",
+            "   [++++++]           ",
+            "   |  )  ( |          ",
+            "   | /    \\|          ",
+            "   |/______\\|         ",
+        };
+
+        public static readonly string[] BishopDead =
+        {
+            "                      ",
+            "  ____/|\\____         ",
+            " / -- /[x]\\ --\\      ",
+            "/  --[++++++]-- \\    ",
+            " ~~~~~~~~~~~~~~~~     ",
+            " ~~~~~~~~~~~~~~~~     ",
+            "                      ",
+        };
+
         // ── SCENES ────────────────────────────────────────────────────────────
 
         public static readonly string[] SceneVillage =
@@ -403,6 +587,31 @@ namespace RPGGame
             "  !! SPECIAL !!     ",
         };
 
+        public static readonly string[] EffectLightning =
+        {
+            "  /\\/\\/\\/\\/\\  ",
+            " /\\/\\/\\/\\/\\/ ",
+            "  /\\/\\/\\/\\/\\  ",
+        };
+
+        public static readonly string[] EffectUltra =
+        {
+            " ★★★★★★★★★★★★★★★ ",
+            " ★   U L T R A !  ★ ",
+            " ★★★★★★★★★★★★★★★ ",
+        };
+
+        public static readonly string[] SceneGraveyard =
+        {
+            "  +    +   +    +   +  ",
+            " /|\\  /|\\  /|\\  /|\\ /|\\ ",
+            "  |    |    |    |   |  ",
+            "__|____|____|____|___|__",
+            "  .~.   .~.  .~.  .~.  ",
+            " (   ) (   )(   )(   ) ",
+            "  `~`   `~`  `~`  `~`  ",
+        };
+
         // ── HELPERS ───────────────────────────────────────────────────────────
 
         public static string[] GetEnemyArt(string name, string state = "normal")
@@ -433,6 +642,26 @@ namespace RPGGame
                 ("魔王・夜陌魯斯", "hurt")   => DemonKingHurt,
                 ("魔王・夜陌魯斯", "dead")   => DemonKingDead,
                 ("魔王・夜陌魯斯", "attack") => DemonKingAttack,
+
+                ("石化蛇王",   "normal") => SerpentNormal,
+                ("石化蛇王",   "hurt")   => SerpentHurt,
+                ("石化蛇王",   "dead")   => SerpentDead,
+                ("石化蛇王",   "attack") => SerpentAttack,
+
+                ("深淵惡魔",   "normal") => AbyssDemonNormal,
+                ("深淵惡魔",   "hurt")   => AbyssDemonHurt,
+                ("深淵惡魔",   "dead")   => AbyssDemonDead,
+                ("深淵惡魔",   "attack") => AbyssDemonAttack,
+
+                ("幽靈騎士",   "normal") => PhantomNormal,
+                ("幽靈騎士",   "hurt")   => PhantomHurt,
+                ("幽靈騎士",   "dead")   => PhantomDead,
+                ("幽靈騎士",   "attack") => PhantomAttack,
+
+                ("腐化主教",   "normal") => BishopNormal,
+                ("腐化主教",   "hurt")   => BishopHurt,
+                ("腐化主教",   "dead")   => BishopDead,
+                ("腐化主教",   "attack") => BishopAttack,
 
                 _ => new[] { $"  [ {name} ]  " }
             };

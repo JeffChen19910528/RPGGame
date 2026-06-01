@@ -234,6 +234,42 @@ namespace RPGGame
             return e;
         }
 
+        public static Enemy CreateSerpentKing()
+        {
+            var e = new Enemy("石化蛇王", "深淵中甦醒的上古蛇王，頭頂玄武石冠，鱗片堅硬如岩，相傳凝視其雙眼片刻便會石化。",
+                hp: 88, atk: 16, def: 5, exp: 75,
+                color: ConsoleColor.DarkGreen);
+            e.SetSpecial("石化毒液", 26, 30);
+            return e;
+        }
+
+        public static Enemy CreateAbyssDemon()
+        {
+            var e = new Enemy("深淵惡魔", "從虛空裂縫中鑽出的純粹邪惡，漆黑的翅膀遮蔽光明，散發著令人窒息的深淵氣息。",
+                hp: 105, atk: 20, def: 6, exp: 92,
+                color: ConsoleColor.DarkMagenta);
+            e.SetSpecial("魂魄吞噬", 30, 28);
+            return e;
+        }
+
+        public static Enemy CreatePhantomKnight()
+        {
+            var e = new Enemy("幽靈騎士", "死於上次魔族侵略的騎士，靈魂被縛於破碎的鎧甲之中，以憤恨與執念繼續作戰。",
+                hp: 110, atk: 21, def: 10, exp: 110,
+                color: ConsoleColor.DarkGray);
+            e.SetSpecial("虛空斬", 34, 28);
+            return e;
+        }
+
+        public static Enemy CreateCorruptedBishop()
+        {
+            var e = new Enemy("腐化主教", "曾以聖光治癒無數靈魂的主教，被魔王的詛咒侵蝕殆盡，如今以黑暗魔法散播腐化與絕望。",
+                hp: 130, atk: 22, def: 9, exp: 120,
+                color: ConsoleColor.DarkRed);
+            e.SetSpecial("黑暗詛咒", 38, 30);
+            return e;
+        }
+
         // ── Random Encounter Pools ───────────────────────────────────────────
 
         public static Enemy GetRandomTier1Enemy(Random rng)
@@ -249,21 +285,32 @@ namespace RPGGame
 
         public static Enemy GetRandomTier2EnemyA(Random rng)
         {
-            return rng.Next(3) switch
+            return rng.Next(4) switch
             {
                 0 => CreateGoblinKnight(),
                 1 => CreateFrostWitch(),
-                _ => CreatePoisonLizard()
+                2 => CreatePoisonLizard(),
+                _ => CreateSerpentKing()
             };
         }
 
         public static Enemy GetRandomTier2EnemyB(Random rng)
         {
-            return rng.Next(3) switch
+            return rng.Next(4) switch
             {
                 0 => CreateShadowWraith(),
                 1 => CreateCorruptedTreant(),
-                _ => CreateAngryGolem()
+                2 => CreateAngryGolem(),
+                _ => CreateAbyssDemon()
+            };
+        }
+
+        public static Enemy GetRandomTier3Enemy(Random rng)
+        {
+            return rng.Next(2) switch
+            {
+                0 => CreatePhantomKnight(),
+                _ => CreateCorruptedBishop()
             };
         }
     }

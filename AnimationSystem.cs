@@ -214,6 +214,19 @@ namespace RPGGame
             UpdateEnemyArt(enemy, "normal");
         }
 
+        public static void AnimateUltraSkill(Player player, Enemy enemy, Skill skill)
+        {
+            UpdatePlayerArt(player, "skill");
+            PrintEffect(AsciiArt.EffectUltra, ConsoleColor.DarkYellow);
+            Thread.Sleep(200);
+            PlaySkillEffect(skill);
+            Thread.Sleep(100);
+            UpdateEnemyArt(enemy, "hurt", ConsoleColor.Red);
+            Thread.Sleep(300);
+            UpdateEnemyArt(enemy, "normal");
+            UpdatePlayerArt(player, "normal");
+        }
+
         public static void AnimateBerserkActivation(Player player)
         {
             for (int i = 0; i < 3; i++)
@@ -295,6 +308,11 @@ namespace RPGGame
                     art = AsciiArt.SceneCastle;
                     title = "── 魔王的城堡 ──";
                     col = ConsoleColor.DarkMagenta;
+                    break;
+                case 4:
+                    art = AsciiArt.SceneGraveyard;
+                    title = "── 亡者的荒野 ──";
+                    col = ConsoleColor.DarkGray;
                     break;
                 default:
                     return;
@@ -391,13 +409,15 @@ namespace RPGGame
         private static void PlaySkillEffect(Skill skill)
         {
             SafeSetCursor(0, MessageAreaRow);
-            string[] effect = skill.Effect switch
-            {
-                SkillEffect.Burn     => AsciiArt.EffectFire,
-                SkillEffect.Stun     => AsciiArt.EffectIce,
-                SkillEffect.Critical => AsciiArt.EffectSlashBerserk,
-                _                    => AsciiArt.EffectSlash,
-            };
+            string[] effect = skill.IsUltra
+                ? AsciiArt.EffectLightning
+                : skill.Effect switch
+                {
+                    SkillEffect.Burn     => AsciiArt.EffectFire,
+                    SkillEffect.Stun     => AsciiArt.EffectIce,
+                    SkillEffect.Critical => AsciiArt.EffectSlashBerserk,
+                    _                    => AsciiArt.EffectSlash,
+                };
             PrintEffect(effect, skill.Color);
         }
 

@@ -231,7 +231,10 @@ namespace RPGGame
             int dmg = SkillSystem.CalculateSkillDamage(_player.Attack, skill, _player.IsBerserk, _rng);
             int actualDmg = enemy.TakeDamage(dmg);
 
-            AnimationSystem.AnimateSkill(_player, enemy, skill);
+            if (skill.IsUltra)
+                AnimationSystem.AnimateUltraSkill(_player, enemy, skill);
+            else
+                AnimationSystem.AnimateSkill(_player, enemy, skill);
 
             Log(ConsoleColor.Yellow, L10n.Get("BATTLE_SKILL_HIT", enemy.Name, actualDmg));
 

@@ -101,6 +101,7 @@ namespace RPGGame
             ["BATTLE_MP_RESTORE"]   = ["  ▶ 戰鬥後恢復 15 MP", "  ▶ Restored 15 MP after battle", "  ▶ 戦闘後MP15回復"],
             ["BATTLE_DEFEAT_MSG"]   = ["  {0} 倒下了...", "  {0} has fallen...", "  {0}が倒れた…"],
             ["SKILL_UNLOCK"]        = ["  ✦ 解鎖新技能：【{0}】【{1}】！", "  ✦ New skills unlocked: [{0}] [{1}]!", "  ✦ 新スキル解放：【{0}】【{1}】！"],
+            ["SKILL_UNLOCK_ULTRA"]  = ["  ★★ 究極技能覺醒：【{0}】！", "  ★★ Ultra skill awakened: [{0}]!", "  ★★ 究極スキル覚醒：【{0}】！"],
 
             // ── Berserk Messages ───────────────────────────────────────────
             ["BERSERK_TRIGGER_1"]   = ["  ★★★ {0} 的怒氣徹底爆發！！！", "  ★★★ {0}'s rage erupts completely!!!", "  ★★★ {0}の怒りが爆発した！！！"],
@@ -191,6 +192,18 @@ namespace RPGGame
             ["SKILL_EXPLOARROW_DESC"]   = ["引爆箭矢，有機率使敵人燃燒", "Detonate an explosive arrow, chance to ignite the enemy", "爆発する矢を放ち、燃焼確率あり"],
             ["SKILL_NATUREHEAL_NAME"]   = ["自然治癒", "Nature's Remedy", "自然の癒し"],
             ["SKILL_NATUREHEAL_DESC"]   = ["藉大自然之力恢復 HP", "Harness the power of nature to restore HP", "自然の力を借りてHPを回復する"],
+
+            // ── Ultra Skills (Lv5) ────────────────────────────────────────
+            ["SKILL_DRAGONAURA_NAME"]     = ["蒼龍劍氣", "Dragon Aura Blade", "蒼龍剣気"],
+            ["SKILL_DRAGONAURA_DESC"]     = ["覺醒戰士之力，以龍氣斬出毀天滅地之擊，高機率燃燒", "Awaken the warrior's spirit, unleash a dragon aura slash with burn", "戦士の力を覚醒、龍気の斬撃、高確率燃焼"],
+            ["SKILL_METEOR_NAME"]         = ["星隕衝擊", "Meteor Impact", "メテオインパクト"],
+            ["SKILL_METEOR_DESC"]         = ["召喚天外星隕轟炸，粉碎一切防禦，有機率眩暈", "Call down a meteor strike to shatter all defenses, chance to stun", "天外の隕石を召喚、全防御を粉砕、眩暈確率あり"],
+            ["SKILL_GODSLAYER_NAME"]      = ["殺神連擊", "God Slayer Combo", "神殺し連撃"],
+            ["SKILL_GODSLAYER_DESC"]      = ["超高速十連斬，無視一切防護，極高暴擊機率", "Ten lightning-fast slashes ignoring all defense, very high crit rate", "超高速の十連斬、全防護無視、非常に高い暴撃確率"],
+            ["SKILL_HOLYREBIRTH_NAME"]    = ["聖光復甦", "Holy Rebirth", "聖光復活"],
+            ["SKILL_HOLYREBIRTH_DESC"]    = ["以神聖之力重生，大量恢復 HP，洗滌一切負面狀態", "Reborn in holy light, massively restore HP and cleanse all ailments", "聖なる力で復活、大量HP回復、全ての状態異常を浄化"],
+            ["SKILL_THOUSANDARROW_NAME"]  = ["萬箭穿心", "Thousand Arrow Barrage", "万の矢・心穿ち"],
+            ["SKILL_THOUSANDARROW_DESC"]  = ["瞬間射出萬箭齊發，覆蓋範圍廣大，高機率燃燒", "Release a barrage of countless arrows covering a wide area, high burn", "無数の矢を一斉射出、広範囲をカバー、高い燃焼確率"],
 
             // ── Chapter Titles ─────────────────────────────────────────────
             ["CH1_TITLE"]           = ["第一章  覺醒", "Chapter 1  Awakening", "第一章  覚醒"],

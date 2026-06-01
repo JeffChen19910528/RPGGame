@@ -25,6 +25,11 @@ namespace RPGGame
             TestPlayerCreation();
             TestBattleBasics();
             TestEnemyStatusEffects();
+            TestNewEnemies();
+            TestTier3Pool();
+            TestUltraSkills();
+            TestSkillIsUltraFlag();
+            TestGameConstants();
 
             PrintSummary();
         }
@@ -231,6 +236,190 @@ namespace RPGGame
                 var en = f();
                 Assert($"{en.Name} NameColor有效", Enum.IsDefined(typeof(ConsoleColor), en.NameColor));
             }
+
+            Console.WriteLine();
+        }
+
+        // ── New Enemy Tests ───────────────────────────────────────────────
+
+        private static void TestNewEnemies()
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine("  [新怪物測試]");
+            Console.ResetColor();
+
+            var newEnemies = new (string label, Func<Enemy> factory, int expectedHp, int expectedAtk, string specialName)[]
+            {
+                ("石化蛇王",   Enemy.CreateSerpentKing,     88,  16, "石化毒液"),
+                ("深淵惡魔",   Enemy.CreateAbyssDemon,     105,  20, "魂魄吞噬"),
+                ("幽靈騎士",   Enemy.CreatePhantomKnight,  110,  21, "虛空斬"),
+                ("腐化主教",   Enemy.CreateCorruptedBishop,130,  22, "黑暗詛咒"),
+            };
+
+            foreach (var (label, factory, hp, atk, specialName) in newEnemies)
+            {
+                var e = factory();
+                Assert($"{label} HP={hp}",              e.MaxHP == hp);
+                Assert($"{label} ATK={atk}",            e.Attack == atk);
+                Assert($"{label} IsAlive",              e.IsAlive);
+                Assert($"{label} Name非空",             !string.IsNullOrEmpty(e.Name));
+                Assert($"{label} Description非空",      !string.IsNullOrEmpty(e.Description));
+                Assert($"{label} HasSpecial",           e.HasSpecial);
+                Assert($"{label} SpecialName={specialName}", e.SpecialName == specialName);
+                Assert($"{label} SpecialDmg>0",         e.SpecialDamage > 0);
+                Assert($"{label} SpecialChance>0",      e.SpecialChance > 0);
+                Assert($"{label} NameColor有效",        Enum.IsDefined(typeof(ConsoleColor), e.NameColor));
+            }
+
+            // Verify defense values are set
+            Assert("石化蛇王 DEF=5",    Enemy.CreateSerpentKing().Defense == 5);
+            Assert("深淵惡魔 DEF=6",    Enemy.CreateAbyssDemon().Defense == 6);
+            Assert("幽靈騎士 DEF=10",   Enemy.CreatePhantomKnight().Defense == 10);
+            Assert("腐化主教 DEF=9",    Enemy.CreateCorruptedBishop().Defense == 9);
+
+            // Verify EXP rewards are positive
+            Assert("石化蛇王 EXP>0",    Enemy.CreateSerpentKing().EXPReward > 0);
+            Assert("深淵惡魔 EXP>0",    Enemy.CreateAbyssDemon().EXPReward > 0);
+            Assert("幽靈騎士 EXP>0",    Enemy.CreatePhantomKnight().EXPReward > 0);
+            Assert("腐化主教 EXP>0",    Enemy.CreateCorruptedBishop().EXPReward > 0);
+
+            Console.WriteLine();
+        }
+
+        // ── Tier3 Pool Tests ──────────────────────────────────────────────
+
+        private static void TestTier3Pool()
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine("  [Tier3 遭遇池測試]");
+            Console.ResetColor();
+
+            var rng = new Random(99);
+            const int iterations = 200;
+            var tier3Names = new HashSet<string>();
+            var tier2ANames = new HashSet<string>();
+            var tier2BNames = new HashSet<string>();
+
+            for (int i = 0; i < iterations; i++)
+            {
+                tier3Names.Add(Enemy.GetRandomTier3Enemy(rng).Name);
+                tier2ANames.Add(Enemy.GetRandomTier2EnemyA(rng).Name);
+                tier2BNames.Add(Enemy.GetRandomTier2EnemyB(rng).Name);
+            }
+
+            // Tier3 should include both enemies
+            Assert("Tier3 含幽靈騎士",   tier3Names.Contains("幽靈騎士"));
+            Assert("Tier3 含腐化主教",   tier3Names.Contains("腐化主教"));
+
+            // Tier2A should now include 4 enemies (石化蛇王 added)
+            Assert("Tier2A 含石化蛇王",  tier2ANames.Contains("石化蛇王"));
+            Assert("Tier2A 含哥布林騎士", tier2ANames.Contains("哥布林騎士"));
+            Assert("Tier2A 含毒沼蜥蜴",  tier2ANames.Contains("毒沼蜥蜴"));
+            Assert("Tier2A 含冰霜女巫",  tier2ANames.Contains("冰霜女巫"));
+
+            // Tier2B should now include 4 enemies (深淵惡魔 added)
+            Assert("Tier2B 含深淵惡魔",  tier2BNames.Contains("深淵惡魔"));
+            Assert("Tier2B 含暗影幽靈",  tier2BNames.Contains("暗影幽靈"));
+            Assert("Tier2B 含腐化樹妖",  tier2BNames.Contains("腐化樹妖"));
+            Assert("Tier2B 含憤怒石像",  tier2BNames.Contains("憤怒石像"));
+
+            Console.WriteLine();
+        }
+
+        // ── Ultra Skill Tests ─────────────────────────────────────────────
+
+        private static void TestUltraSkills()
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine("  [究極技能測試]");
+            Console.ResetColor();
+
+            var classes = new[] {
+                PlayerClass.Warrior, PlayerClass.Mage, PlayerClass.Assassin,
+                PlayerClass.Paladin, PlayerClass.Ranger
+            };
+
+            foreach (var cls in classes)
+            {
+                var ultra = SkillSystem.GetUltraSkills(cls);
+                Assert($"{cls} 究極技能數量=1",      ultra.Count == 1);
+                Assert($"{cls} 究極技能名稱非空",    !string.IsNullOrEmpty(ultra[0].Name));
+                Assert($"{cls} 究極技能描述非空",    !string.IsNullOrEmpty(ultra[0].Description));
+                Assert($"{cls} 究極技能IsUltra=true", ultra[0].IsUltra);
+
+                if (cls != PlayerClass.Paladin)
+                    Assert($"{cls} 究極技能傷害倍率>3.0", ultra[0].DamageMultiplier > 3.0);
+                else
+                    Assert($"{cls} Paladin究極技能治癒>80", ultra[0].HealAmount > 80);
+
+                Assert($"{cls} 究極技能MP>0",        ultra[0].MpCost > 0);
+            }
+
+            // Verify specific ultra skill properties
+            var warriorUltra = SkillSystem.GetUltraSkills(PlayerClass.Warrior)[0];
+            Assert("戰士究極 Effect=Burn",   warriorUltra.Effect == SkillEffect.Burn);
+            Assert("戰士究極 EffectChance>0.5", warriorUltra.EffectChance > 0.5f);
+
+            var mageUltra = SkillSystem.GetUltraSkills(PlayerClass.Mage)[0];
+            Assert("法師究極 Effect=Stun",   mageUltra.Effect == SkillEffect.Stun);
+
+            var assassinUltra = SkillSystem.GetUltraSkills(PlayerClass.Assassin)[0];
+            Assert("刺客究極 Effect=Critical", assassinUltra.Effect == SkillEffect.Critical);
+            Assert("刺客究極 EffectChance=0.8", Math.Abs(assassinUltra.EffectChance - 0.80f) < 0.01f);
+
+            var paladinUltra = SkillSystem.GetUltraSkills(PlayerClass.Paladin)[0];
+            Assert("聖騎士究極 IsHeal=true",  paladinUltra.IsHeal);
+            Assert("聖騎士究極 Heal=100",     paladinUltra.HealAmount == 100);
+
+            var rangerUltra = SkillSystem.GetUltraSkills(PlayerClass.Ranger)[0];
+            Assert("遊俠究極 Effect=Burn",    rangerUltra.Effect == SkillEffect.Burn);
+            Assert("遊俠究極 EffectChance=0.7", Math.Abs(rangerUltra.EffectChance - 0.70f) < 0.01f);
+
+            Console.WriteLine();
+        }
+
+        // ── IsUltra Flag Tests ────────────────────────────────────────────
+
+        private static void TestSkillIsUltraFlag()
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine("  [IsUltra旗標測試]");
+            Console.ResetColor();
+
+            // Starter and advanced skills should NOT be ultra
+            foreach (var cls in new[] { PlayerClass.Warrior, PlayerClass.Mage, PlayerClass.Assassin,
+                                        PlayerClass.Paladin, PlayerClass.Ranger })
+            {
+                foreach (var sk in SkillSystem.GetStarterSkills(cls))
+                    Assert($"{cls} 初始技能IsUltra=false ({sk.Name})", !sk.IsUltra);
+
+                foreach (var sk in SkillSystem.GetAdvancedSkills(cls))
+                    Assert($"{cls} 進階技能IsUltra=false ({sk.Name})", !sk.IsUltra);
+
+                foreach (var sk in SkillSystem.GetUltraSkills(cls))
+                    Assert($"{cls} 究極技能IsUltra=true ({sk.Name})", sk.IsUltra);
+            }
+
+            Console.WriteLine();
+        }
+
+        // ── GameConstants Tests ───────────────────────────────────────────
+
+        private static void TestGameConstants()
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine("  [GameConstants 測試]");
+            Console.ResetColor();
+
+            Assert("MaxRage=100",           GameConstants.MaxRage == 100);
+            Assert("BerserkDuration=4",     GameConstants.BerserkDuration == 4);
+            Assert("BerserkMultiplier=1.5", Math.Abs(GameConstants.BerserkMultiplier - 1.5) < 0.001);
+            Assert("DefaultBurnDamage=9",   GameConstants.DefaultBurnDamage == 9);
+            Assert("DefaultBurnTurns=3",    GameConstants.DefaultBurnTurns == 3);
+            Assert("AdvancedSkillLevel=3",  GameConstants.AdvancedSkillLevel == 3);
+            Assert("UltraSkillLevel=5",     GameConstants.UltraSkillLevel == 5);
+            Assert("HPGainPerLevel=20",     GameConstants.HPGainPerLevel == 20);
+            Assert("EXPScaleRate=1.6",      Math.Abs(GameConstants.EXPScaleRate - 1.6) < 0.001);
 
             Console.WriteLine();
         }

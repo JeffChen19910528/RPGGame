@@ -23,11 +23,12 @@ namespace RPGGame
         public bool IsHeal { get; set; }
         public int HealAmount { get; set; }
         public ConsoleColor Color { get; set; }
+        public bool IsUltra { get; set; }
 
         public Skill(string name, string desc, int mpCost, double dmgMult,
                      SkillEffect effect = SkillEffect.None, float effectChance = 0f,
                      bool isHeal = false, int healAmount = 0, int rageCost = 0,
-                     ConsoleColor color = ConsoleColor.Cyan)
+                     ConsoleColor color = ConsoleColor.Cyan, bool isUltra = false)
         {
             Name = name;
             Description = desc;
@@ -39,6 +40,7 @@ namespace RPGGame
             IsHeal = isHeal;
             HealAmount = healAmount;
             Color = color;
+            IsUltra = isUltra;
         }
     }
 
@@ -62,6 +64,16 @@ namespace RPGGame
             PlayerClass.Paladin  => GetPaladinAdvanced(),
             PlayerClass.Ranger   => GetRangerAdvanced(),
             _                    => GetWarriorAdvanced()
+        };
+
+        public static List<Skill> GetUltraSkills(PlayerClass cls) => cls switch
+        {
+            PlayerClass.Warrior  => GetWarriorUltra(),
+            PlayerClass.Mage     => GetMageUltra(),
+            PlayerClass.Assassin => GetAssassinUltra(),
+            PlayerClass.Paladin  => GetPaladinUltra(),
+            PlayerClass.Ranger   => GetRangerUltra(),
+            _                    => GetWarriorUltra()
         };
 
         // ── Warrior ──────────────────────────────────────────────────────────
@@ -172,6 +184,43 @@ namespace RPGGame
                 mpCost: 25, dmgMult: 2.8, effect: SkillEffect.Burn, effectChance: 0.55f, color: ConsoleColor.Red),
             new Skill(L10n.Get("SKILL_NATUREHEAL_NAME"), L10n.Get("SKILL_NATUREHEAL_DESC"),
                 mpCost: 28, dmgMult: 0, isHeal: true, healAmount: 60, color: ConsoleColor.Green)
+        };
+
+        // ── Ultra Skills (Lv5) ───────────────────────────────────────────────
+
+        private static List<Skill> GetWarriorUltra() => new()
+        {
+            new Skill(L10n.Get("SKILL_DRAGONAURA_NAME"), L10n.Get("SKILL_DRAGONAURA_DESC"),
+                mpCost: 35, dmgMult: 3.5, effect: SkillEffect.Burn, effectChance: 0.55f,
+                color: ConsoleColor.DarkYellow, isUltra: true)
+        };
+
+        private static List<Skill> GetMageUltra() => new()
+        {
+            new Skill(L10n.Get("SKILL_METEOR_NAME"), L10n.Get("SKILL_METEOR_DESC"),
+                mpCost: 40, dmgMult: 4.0, effect: SkillEffect.Stun, effectChance: 0.45f,
+                color: ConsoleColor.DarkRed, isUltra: true)
+        };
+
+        private static List<Skill> GetAssassinUltra() => new()
+        {
+            new Skill(L10n.Get("SKILL_GODSLAYER_NAME"), L10n.Get("SKILL_GODSLAYER_DESC"),
+                mpCost: 30, dmgMult: 4.2, effect: SkillEffect.Critical, effectChance: 0.80f,
+                color: ConsoleColor.DarkMagenta, isUltra: true)
+        };
+
+        private static List<Skill> GetPaladinUltra() => new()
+        {
+            new Skill(L10n.Get("SKILL_HOLYREBIRTH_NAME"), L10n.Get("SKILL_HOLYREBIRTH_DESC"),
+                mpCost: 45, dmgMult: 0, isHeal: true, healAmount: 100,
+                color: ConsoleColor.White, isUltra: true)
+        };
+
+        private static List<Skill> GetRangerUltra() => new()
+        {
+            new Skill(L10n.Get("SKILL_THOUSANDARROW_NAME"), L10n.Get("SKILL_THOUSANDARROW_DESC"),
+                mpCost: 38, dmgMult: 3.2, effect: SkillEffect.Burn, effectChance: 0.70f,
+                color: ConsoleColor.DarkGreen, isUltra: true)
         };
 
         // ── Damage Calculation ────────────────────────────────────────────────
