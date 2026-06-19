@@ -27,7 +27,8 @@ namespace RPGGame
                     case 1: StartNewGame(); break;
                     case 2: LoadGame(); break;
                     case 3: ShowHelp(); continue;
-                    case 4: return;
+                    case 4: ShowSettings(); continue;
+                    case 5: return;
                 }
 
                 // After game ends, offer restart
@@ -92,9 +93,10 @@ namespace RPGGame
             Console.ResetColor();
 
             Console.WriteLine(L10n.Get("MENU_HELP"));
+            Console.WriteLine(L10n.Get("MENU_SETTINGS"));
             Console.WriteLine(L10n.Get("MENU_QUIT"));
 
-            return Utils.GetChoice(L10n.Get("MENU_SELECT"), 1, 4);
+            return Utils.GetChoice(L10n.Get("MENU_SELECT"), 1, 5);
         }
 
         // ── New Game ─────────────────────────────────────────────────────────
@@ -234,8 +236,10 @@ namespace RPGGame
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(L10n.Get("LOAD_CORRUPT"));
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine($"  ({ex.Message})");
                 Console.ResetColor();
-                Utils.Pause(1200);
+                Utils.Pause(1500);
                 StartNewGame();
             }
         }
@@ -248,6 +252,7 @@ namespace RPGGame
 
             var data = new SaveData
             {
+                Version         = GameConstants.SaveVersion,
                 PlayerName      = _player.Name,
                 Level           = _player.Level,
                 HP              = _player.HP,
@@ -295,12 +300,81 @@ namespace RPGGame
                 Class             = (PlayerClass)d.ClassId
             };
 
-            // Re-init class skills and unlock advanced if level 3+
             p.InitClassSkills();
-            if (p.Level >= 3)
+            if (p.Level >= GameConstants.AdvancedSkillLevel)
                 p.Skills.AddRange(SkillSystem.GetAdvancedSkills(p.Class));
+            if (p.Level >= GameConstants.UltraSkillLevel)
+                p.Skills.AddRange(SkillSystem.GetUltraSkills(p.Class));
 
             return p;
+        }
+
+        // ── Settings ─────────────────────────────────────────────────────────
+
+        private static void ShowSettings()
+        {
+            Console.Clear();
+            Utils.PrintTitle(L10n.Get("SETTINGS_TITLE"));
+
+            // Text Speed
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(L10n.Get("SETTINGS_SPEED"));
+            Console.ResetColor();
+            Console.WriteLine(L10n.Get("SETTINGS_SPEED_1"));
+            Console.WriteLine(L10n.Get("SETTINGS_SPEED_2"));
+            Console.WriteLine(L10n.Get("SETTINGS_SPEED_3"));
+            Console.WriteLine(L10n.Get("SETTINGS_SPEED_4"));
+            string currentSpeed = GameSettings.Speed switch
+            {
+                TextSpeed.Instant => L10n.Get("SETTINGS_SPEED_INSTANT"),
+                TextSpeed.Fast    => L10n.Get("SETTINGS_SPEED_FAST"),
+                TextSpeed.Slow    => L10n.Get("SETTINGS_SPEED_SLOW"),
+                _                 => L10n.Get("SETTINGS_SPEED_NORMAL")
+            };
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(L10n.Get("SETTINGS_CURRENT", currentSpeed));
+            Console.ResetColor();
+
+            int speedChoice = Utils.GetChoice(L10n.Get("MENU_SELECT"), 1, 4);
+            GameSettings.Speed = speedChoice switch
+            {
+                1 => TextSpeed.Instant,
+                2 => TextSpeed.Fast,
+                3 => TextSpeed.Normal,
+                _ => TextSpeed.Slow
+            };
+
+            // Difficulty
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(L10n.Get("SETTINGS_DIFFICULTY"));
+            Console.ResetColor();
+            Console.WriteLine(L10n.Get("SETTINGS_DIFF_1"));
+            Console.WriteLine(L10n.Get("SETTINGS_DIFF_2"));
+            Console.WriteLine(L10n.Get("SETTINGS_DIFF_3"));
+            string currentDiff = GameSettings.Difficulty switch
+            {
+                DifficultyLevel.Easy => L10n.Get("SETTINGS_DIFF_EASY"),
+                DifficultyLevel.Hard => L10n.Get("SETTINGS_DIFF_HARD"),
+                _                    => L10n.Get("SETTINGS_DIFF_NORMAL")
+            };
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(L10n.Get("SETTINGS_CURRENT", currentDiff));
+            Console.ResetColor();
+
+            int diffChoice = Utils.GetChoice(L10n.Get("MENU_SELECT"), 1, 3);
+            GameSettings.Difficulty = diffChoice switch
+            {
+                1 => DifficultyLevel.Easy,
+                2 => DifficultyLevel.Normal,
+                _ => DifficultyLevel.Hard
+            };
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(L10n.Get("SETTINGS_SAVED"));
+            Console.ResetColor();
+            Utils.Pause(800);
         }
 
         // ── Help / Credits ───────────────────────────────────────────────────
@@ -340,27 +414,26 @@ namespace RPGGame
             if (_player == null) return;
 
             Console.Clear();
-            Utils.PrintTitle("旅 程 終 結");
+            Utils.PrintTitle(L10n.Get("CREDITS_TITLE"));
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine("  感謝遊玩《暴走：黑暗年代記》！");
+            Console.WriteLine(L10n.Get("CREDITS_THANKS"));
             Console.WriteLine();
-            Console.WriteLine("  ─── 本局統計 ───────────────────────────");
-            Console.WriteLine($"  角色名稱    {_player.Name}");
-            Console.WriteLine($"  最終等級    Lv.{_player.Level}");
-            Console.WriteLine($"  最終 HP     {_player.HP}/{_player.MaxHP}");
-            Console.WriteLine($"  腐化值      {_player.CorruptionLevel}");
-            Console.WriteLine($"  暴走次數    {_player.TotalBerserkUses}");
-            Console.WriteLine($"  幫助村民    {(_player.HelpedVillager ? "是" : "否")}");
-            Console.WriteLine($"  接受黑暗    {(_player.AcceptedDarkPower ? "是" : "否")}");
+            Console.WriteLine(L10n.Get("CREDITS_STATS"));
+            Console.WriteLine($"  {L10n.Get("CREDITS_NAME"),-10}  {_player.Name}");
+            Console.WriteLine($"  {L10n.Get("CREDITS_LEVEL"),-10}  Lv.{_player.Level}");
+            Console.WriteLine($"  {L10n.Get("CREDITS_HP"),-10}  {_player.HP}/{_player.MaxHP}");
+            Console.WriteLine($"  {L10n.Get("CREDITS_CORRUPT"),-10}  {_player.CorruptionLevel}");
+            Console.WriteLine($"  {L10n.Get("CREDITS_BERSERK"),-10}  {_player.TotalBerserkUses}");
+            Console.WriteLine($"  {L10n.Get("CREDITS_HELPED"),-10}  {(_player.HelpedVillager ? L10n.Get("CREDITS_YES") : L10n.Get("CREDITS_NO"))}");
+            Console.WriteLine($"  {L10n.Get("CREDITS_DARK"),-10}  {(_player.AcceptedDarkPower ? L10n.Get("CREDITS_YES") : L10n.Get("CREDITS_NO"))}");
             Console.WriteLine("  ─────────────────────────────────────────");
             Console.ResetColor();
 
-            // Delete save on completion
             if (File.Exists(SaveFile))
                 File.Delete(SaveFile);
 
-            Utils.PressAnyKey("[ 按任意鍵返回主選單 ]");
+            Utils.PressAnyKey(L10n.Get("PRESS_ANY_KEY_MENU"));
         }
     }
 
@@ -368,6 +441,7 @@ namespace RPGGame
 
     public class SaveData
     {
+        public int Version { get; set; } = GameConstants.SaveVersion;
         public string PlayerName { get; set; } = "";
         public int Level { get; set; }
         public int HP { get; set; }

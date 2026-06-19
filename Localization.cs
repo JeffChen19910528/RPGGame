@@ -39,7 +39,8 @@ namespace RPGGame
             ["MENU_LOAD"]           = ["  [2] 讀取存檔", "  [2] Load Game", "  [2] データロード"],
             ["MENU_LOAD_NONE"]      = ["  [2] 讀取存檔（無存檔）", "  [2] Load Game (no save)", "  [2] データロード（データなし）"],
             ["MENU_HELP"]           = ["  [3] 遊玩說明", "  [3] How to Play", "  [3] ヘルプ"],
-            ["MENU_QUIT"]           = ["  [4] 退出遊戲", "  [4] Quit", "  [4] 終了"],
+            ["MENU_SETTINGS"]       = ["  [4] 遊戲設定", "  [4] Settings", "  [4] 設定"],
+            ["MENU_QUIT"]           = ["  [5] 退出遊戲", "  [5] Quit", "  [5] 終了"],
             ["MENU_SELECT"]         = ["選擇", "Select", "選択"],
 
             // ── Character Creation ─────────────────────────────────────────
@@ -855,6 +856,27 @@ namespace RPGGame
             ["STORY_ATK_BONUS"]      = ["  ✦ ATK +6，但腐化值大幅上升",
                                          "  ✦ ATK +6, but corruption greatly increased",
                                          "  ✦ ATK+6、しかし腐敗値が大幅上昇"],
+
+            // ── Settings Menu ───────────────────────────────────────────────
+            ["SETTINGS_TITLE"]       = ["遊 戲 設 定", "GAME  SETTINGS", "ゲーム設定"],
+            ["SETTINGS_SPEED"]       = ["  ◆ 文字顯示速度", "  ◆ Text Speed", "  ◆ テキスト速度"],
+            ["SETTINGS_SPEED_1"]     = ["  [1] 瞬間（無動畫效果）", "  [1] Instant (no animation)", "  [1] 瞬時（アニメなし）"],
+            ["SETTINGS_SPEED_2"]     = ["  [2] 快速", "  [2] Fast", "  [2] 高速"],
+            ["SETTINGS_SPEED_3"]     = ["  [3] 普通（預設）", "  [3] Normal (default)", "  [3] 標準（デフォルト）"],
+            ["SETTINGS_SPEED_4"]     = ["  [4] 慢速", "  [4] Slow", "  [4] 低速"],
+            ["SETTINGS_SPEED_INSTANT"]= ["瞬間", "Instant", "瞬時"],
+            ["SETTINGS_SPEED_FAST"]  = ["快速", "Fast", "高速"],
+            ["SETTINGS_SPEED_NORMAL"]= ["普通", "Normal", "標準"],
+            ["SETTINGS_SPEED_SLOW"]  = ["慢速", "Slow", "低速"],
+            ["SETTINGS_DIFFICULTY"]  = ["  ◆ 遊戲難度", "  ◆ Difficulty", "  ◆ 難易度"],
+            ["SETTINGS_DIFF_1"]      = ["  [1] 簡單（敵方傷害 ×0.75，EXP ×1.2）", "  [1] Easy (enemy dmg ×0.75, EXP ×1.2)", "  [1] イージー（敵ダメ×0.75、EXP×1.2）"],
+            ["SETTINGS_DIFF_2"]      = ["  [2] 普通（預設）", "  [2] Normal (default)", "  [2] ノーマル（デフォルト）"],
+            ["SETTINGS_DIFF_3"]      = ["  [3] 困難（敵方傷害 ×1.4，EXP ×0.85）", "  [3] Hard (enemy dmg ×1.4, EXP ×0.85)", "  [3] ハード（敵ダメ×1.4、EXP×0.85）"],
+            ["SETTINGS_DIFF_EASY"]   = ["簡單", "Easy", "イージー"],
+            ["SETTINGS_DIFF_NORMAL"] = ["普通", "Normal", "ノーマル"],
+            ["SETTINGS_DIFF_HARD"]   = ["困難", "Hard", "ハード"],
+            ["SETTINGS_CURRENT"]     = ["  目前設定：{0}", "  Current: {0}", "  現在の設定：{0}"],
+            ["SETTINGS_SAVED"]       = ["  ✓ 設定已套用", "  ✓ Settings applied", "  ✓ 設定を適用しました"],
         };
     }
 }

@@ -132,9 +132,9 @@ namespace RPGGame
             if (_player.IsBerserk) rawDamage = (int)(rawDamage * 1.5);
 
             // Berserk backfire
-            if (_player.IsBerserk && _rng.Next(100) < 20)
+            if (_player.IsBerserk && _rng.Next(100) < GameConstants.BerserkBackfireChance)
             {
-                int self = Math.Max(1, (int)(_player.BaseAttack * 0.35));
+                int self = Math.Max(1, (int)(_player.BaseAttack * GameConstants.BerserkBackfireDamageRatio));
                 _player.HP = Math.Max(0, _player.HP - self);
                 _player.CorruptionLevel++;
                 AnimationSystem.UpdatePlayerArt(_player, "hurt");
@@ -215,9 +215,9 @@ namespace RPGGame
             }
 
             // Rage-skill backfire
-            if (skill.RageCost > 0 && _rng.Next(100) < 22)
+            if (skill.RageCost > 0 && _rng.Next(100) < GameConstants.RageSkillBackfireChance)
             {
-                int selfDmg = Math.Max(1, (int)(_player.BaseAttack * 0.4));
+                int selfDmg = Math.Max(1, (int)(_player.BaseAttack * GameConstants.RageSkillBackfireDamageRatio));
                 _player.HP = Math.Max(0, _player.HP - selfDmg);
                 _player.CorruptionLevel++;
                 AnimationSystem.UpdatePlayerArt(_player, "hurt");
@@ -251,7 +251,7 @@ namespace RPGGame
             switch (effect)
             {
                 case SkillEffect.Burn:
-                    enemy.ApplyBurn(9, 3);
+                    enemy.ApplyBurn(GameConstants.DefaultBurnDamage, GameConstants.DefaultBurnTurns);
                     Log(ConsoleColor.Red, L10n.Get("BATTLE_BURN_APPLY", enemy.Name));
                     break;
                 case SkillEffect.Stun:
@@ -259,7 +259,7 @@ namespace RPGGame
                     Log(ConsoleColor.Yellow, L10n.Get("BATTLE_STUN_APPLY", enemy.Name));
                     break;
                 case SkillEffect.Critical:
-                    int extra = Math.Max(1, (int)(_player.Attack * 0.9));
+                    int extra = Math.Max(1, (int)(_player.Attack * GameConstants.CritBonusMultiplier));
                     enemy.TakeDamage(extra);
                     Log(ConsoleColor.Magenta, L10n.Get("BATTLE_CRIT_APPLY", extra));
                     break;
@@ -287,7 +287,7 @@ namespace RPGGame
             }
 
             bool useSpecial = enemy.HasSpecial && _rng.Next(100) < enemy.SpecialChance;
-            int rawDamage = useSpecial ? enemy.SpecialDamage : enemy.Attack;
+            int rawDamage = (int)((useSpecial ? enemy.SpecialDamage : enemy.Attack) * GameSettings.EnemyDamageMultiplier);
 
             bool wasDefending = _player.CurrentStatus == StatusEffect.Defending;
             int actualDamage = _player.TakeDamage(rawDamage);
@@ -319,8 +319,9 @@ namespace RPGGame
                 if (isFinalBoss && _player.IsBerserk)
                     _player.FinalBossDefeatedInBerserk = true;
 
-                bool leveled = _player.GainEXP(enemy.EXPReward);
-                Log(ConsoleColor.Cyan, L10n.Get("BATTLE_EXP_GAIN", enemy.EXPReward));
+                int expGained = (int)(enemy.EXPReward * GameSettings.EXPMultiplier);
+                bool leveled = _player.GainEXP(expGained);
+                Log(ConsoleColor.Cyan, L10n.Get("BATTLE_EXP_GAIN", expGained));
 
                 if (leveled)
                 {
@@ -328,7 +329,7 @@ namespace RPGGame
                     Log(ConsoleColor.Yellow, L10n.Get("BATTLE_LEVEL_STATS"));
                 }
 
-                _player.RestoreMP(15);
+                _player.RestoreMP(GameConstants.PostBattleMPRestore);
                 Log(ConsoleColor.Blue, L10n.Get("BATTLE_MP_RESTORE"));
 
                 Utils.PressAnyKey();

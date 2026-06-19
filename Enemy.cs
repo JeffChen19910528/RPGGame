@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace RPGGame
 {
@@ -271,47 +272,32 @@ namespace RPGGame
         }
 
         // ── Random Encounter Pools ───────────────────────────────────────────
+        // Array-based pools: add a new Func<Enemy> entry to expand a tier without
+        // touching the selection logic.
 
-        public static Enemy GetRandomTier1Enemy(Random rng)
-        {
-            return rng.Next(4) switch
-            {
-                0 => CreateSlime(),
-                1 => CreateSkeletonArcher(),
-                2 => CreateCrystalSpider(),
-                _ => CreateVampireBatSwarm()
-            };
-        }
+        private static readonly Func<Enemy>[] Tier1Pool =
+        [
+            CreateSlime, CreateSkeletonArcher, CreateCrystalSpider, CreateVampireBatSwarm
+        ];
 
-        public static Enemy GetRandomTier2EnemyA(Random rng)
-        {
-            return rng.Next(4) switch
-            {
-                0 => CreateGoblinKnight(),
-                1 => CreateFrostWitch(),
-                2 => CreatePoisonLizard(),
-                _ => CreateSerpentKing()
-            };
-        }
+        private static readonly Func<Enemy>[] Tier2APool =
+        [
+            CreateGoblinKnight, CreateFrostWitch, CreatePoisonLizard, CreateSerpentKing
+        ];
 
-        public static Enemy GetRandomTier2EnemyB(Random rng)
-        {
-            return rng.Next(4) switch
-            {
-                0 => CreateShadowWraith(),
-                1 => CreateCorruptedTreant(),
-                2 => CreateAngryGolem(),
-                _ => CreateAbyssDemon()
-            };
-        }
+        private static readonly Func<Enemy>[] Tier2BPool =
+        [
+            CreateShadowWraith, CreateCorruptedTreant, CreateAngryGolem, CreateAbyssDemon
+        ];
 
-        public static Enemy GetRandomTier3Enemy(Random rng)
-        {
-            return rng.Next(2) switch
-            {
-                0 => CreatePhantomKnight(),
-                _ => CreateCorruptedBishop()
-            };
-        }
+        private static readonly Func<Enemy>[] Tier3Pool =
+        [
+            CreatePhantomKnight, CreateCorruptedBishop
+        ];
+
+        public static Enemy GetRandomTier1Enemy(Random rng)  => Tier1Pool[rng.Next(Tier1Pool.Length)]();
+        public static Enemy GetRandomTier2EnemyA(Random rng) => Tier2APool[rng.Next(Tier2APool.Length)]();
+        public static Enemy GetRandomTier2EnemyB(Random rng) => Tier2BPool[rng.Next(Tier2BPool.Length)]();
+        public static Enemy GetRandomTier3Enemy(Random rng)  => Tier3Pool[rng.Next(Tier3Pool.Length)]();
     }
 }

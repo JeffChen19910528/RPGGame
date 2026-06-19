@@ -3,15 +3,47 @@ using System.Threading;
 
 namespace RPGGame
 {
+    public enum TextSpeed { Instant, Fast, Normal, Slow }
+    public enum DifficultyLevel { Easy, Normal, Hard }
+
+    public static class GameSettings
+    {
+        public static TextSpeed Speed { get; set; } = TextSpeed.Normal;
+        public static DifficultyLevel Difficulty { get; set; } = DifficultyLevel.Normal;
+
+        public static double SpeedFactor => Speed switch
+        {
+            TextSpeed.Instant => 0.0,
+            TextSpeed.Fast    => 0.33,
+            TextSpeed.Slow    => 2.0,
+            _                 => 1.0
+        };
+
+        public static double EnemyDamageMultiplier => Difficulty switch
+        {
+            DifficultyLevel.Easy => 0.75,
+            DifficultyLevel.Hard => 1.4,
+            _                    => 1.0
+        };
+
+        public static double EXPMultiplier => Difficulty switch
+        {
+            DifficultyLevel.Easy => 1.2,
+            DifficultyLevel.Hard => 0.85,
+            _                    => 1.0
+        };
+    }
+
     public static class Utils
     {
         public static void TypeText(string text, int delay = 30, ConsoleColor color = ConsoleColor.White)
         {
             Console.ForegroundColor = color;
+            int actualDelay = (int)(delay * GameSettings.SpeedFactor);
             foreach (char c in text)
             {
                 Console.Write(c);
-                if (delay > 0) Thread.Sleep(delay);
+                if (actualDelay > 0) Thread.Sleep(actualDelay);
             }
             Console.WriteLine();
             Console.ResetColor();
@@ -63,7 +95,11 @@ namespace RPGGame
             Console.Write($"\n  {prompt}: ");
             Console.ResetColor();
             string? result = Console.ReadLine();
-            return string.IsNullOrWhiteSpace(result) ? L10n.Get("CREATE_DEFAULT_NAME") : result;
+            if (string.IsNullOrWhiteSpace(result))
+                return L10n.Get("CREATE_DEFAULT_NAME");
+            return result.Length > GameConstants.MaxPlayerNameLength
+                ? result[..GameConstants.MaxPlayerNameLength]
+                : result;
         }
 
         public static void DrawProgressBar(int current, int max, int width = 20, ConsoleColor fillColor = ConsoleColor.Green)

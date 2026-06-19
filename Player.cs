@@ -109,7 +109,7 @@ namespace RPGGame
         private void TriggerBerserk()
         {
             IsBerserk = true;
-            BerserkTurnsLeft = 4;
+            BerserkTurnsLeft = GameConstants.BerserkDuration;
             TotalBerserkUses++;
             RageEnergy = 0;
 
