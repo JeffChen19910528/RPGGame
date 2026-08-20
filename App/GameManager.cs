@@ -1,8 +1,11 @@
 using System;
-using System.IO;
-using System.Text.Json;
+using RPGGame.Content;
+using RPGGame.Domain;
+using RPGGame.Persistence;
+using RPGGame.Presentation;
+using RPGGame.Systems;
 
-namespace RPGGame
+namespace RPGGame.App
 {
     public class GameManager
     {
@@ -10,7 +13,7 @@ namespace RPGGame
         private BattleSystem? _battle;
         private StoryManager? _story;
         private readonly Random _rng = new Random();
-        private const string SaveFile = "savegame.json";
+        private readonly SaveGameService _saveService = new SaveGameService();
 
         // ── Entry point ─────────────────────────────────────────────────────
 
@@ -80,7 +83,7 @@ namespace RPGGame
 
         private int ShowMainMenu()
         {
-            bool hasSave = File.Exists(SaveFile);
+            bool hasSave = _saveService.HasSave();
 
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Yellow;
@@ -120,45 +123,11 @@ namespace RPGGame
             Console.WriteLine(L10n.Get("CREATE_CLASS_5"));
 
             int cls = Utils.GetChoice(L10n.Get("CREATE_CLASS_SELECT"), 1, 5);
+            var classDef = ClassDefinitions.FromMenuChoice(cls);
 
             _player = new Player(name);
-            _player.Class = cls switch
-            {
-                1 => PlayerClass.Warrior,
-                2 => PlayerClass.Mage,
-                3 => PlayerClass.Assassin,
-                4 => PlayerClass.Paladin,
-                _ => PlayerClass.Ranger
-            };
-            switch (cls)
-            {
-                case 1:
-                    _player.MaxHP += 30; _player.HP += 30;
-                    _player.BaseDefense += 5;
-                    Utils.TypeText($"\n  {name} {L10n.Get("INTRO_WARRIOR")}。", 38, ConsoleColor.Yellow);
-                    break;
-                case 2:
-                    _player.MaxMP += 30; _player.MP += 30;
-                    _player.BaseAttack += 3;
-                    Utils.TypeText($"\n  {name} {L10n.Get("INTRO_MAGE")}。", 38, ConsoleColor.Cyan);
-                    break;
-                case 3:
-                    _player.BaseAttack += 8;
-                    _player.MaxHP -= 10; _player.HP -= 10;
-                    Utils.TypeText($"\n  {name} {L10n.Get("INTRO_ASSASSIN")}。", 38, ConsoleColor.DarkGray);
-                    break;
-                case 4:
-                    _player.MaxHP += 40; _player.HP += 40;
-                    _player.BaseDefense += 8;
-                    _player.BaseAttack -= 2;
-                    Utils.TypeText($"\n  {name} {L10n.Get("INTRO_PALADIN")}。", 38, ConsoleColor.Yellow);
-                    break;
-                case 5:
-                    _player.BaseAttack += 5;
-                    _player.MaxMP += 20; _player.MP += 20;
-                    Utils.TypeText($"\n  {name} {L10n.Get("INTRO_RANGER")}。", 38, ConsoleColor.DarkGreen);
-                    break;
-            }
+            ClassDefinitions.ApplyStartingBonus(_player, classDef);
+            Utils.TypeText($"\n  {name} {L10n.Get(classDef.IntroKey)}。", 38, classDef.IntroColor);
             _player.InitClassSkills();
 
             Utils.PressAnyKey();
@@ -187,7 +156,7 @@ namespace RPGGame
 
         private void LoadGame()
         {
-            if (!File.Exists(SaveFile))
+            if (!_saveService.HasSave())
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(L10n.Get("LOAD_FAIL"));
@@ -198,22 +167,19 @@ namespace RPGGame
 
             try
             {
-                string json = File.ReadAllText(SaveFile);
-                var data = JsonSerializer.Deserialize<SaveData>(json)
-                    ?? throw new InvalidDataException("存檔資料無效");
-
-                _player = BuildPlayerFromSave(data);
+                var (player, chapter) = _saveService.Load();
+                _player = player;
                 _battle = new BattleSystem(_player, _rng);
                 _story = new StoryManager(_player, _battle, _rng);
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine(L10n.Get("LOAD_SUCCESS", data.PlayerName));
+                Console.WriteLine(L10n.Get("LOAD_SUCCESS", _player.Name));
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine(L10n.Get("LOAD_CHAPTER", data.CurrentChapter));
+                Console.WriteLine(L10n.Get("LOAD_CHAPTER", chapter));
                 Console.ResetColor();
                 Utils.Pause(800);
 
-                switch (data.CurrentChapter)
+                switch (chapter)
                 {
                     case 2:
                         _story.PlayChapter2();
@@ -244,69 +210,18 @@ namespace RPGGame
             }
         }
 
-        // ── Save / Load helpers ───────────────────────────────────────────────
+        // ── Save helper ─────────────────────────────────────────────────────
 
         private void SaveGame(int chapter)
         {
             if (_player == null) return;
 
-            var data = new SaveData
-            {
-                Version         = GameConstants.SaveVersion,
-                PlayerName      = _player.Name,
-                Level           = _player.Level,
-                HP              = _player.HP,
-                MaxHP           = _player.MaxHP,
-                MP              = _player.MP,
-                MaxMP           = _player.MaxMP,
-                BaseAttack      = _player.BaseAttack,
-                BaseDefense     = _player.BaseDefense,
-                EXP             = _player.EXP,
-                EXPToNextLevel  = _player.EXPToNextLevel,
-                CorruptionLevel = _player.CorruptionLevel,
-                AcceptedDark    = _player.AcceptedDarkPower,
-                HelpedVillager  = _player.HelpedVillager,
-                BerserkUses     = _player.TotalBerserkUses,
-                ClassId         = (int)_player.Class,
-                CurrentChapter  = chapter
-            };
-
-            string json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(SaveFile, json);
+            _saveService.Save(_player, chapter);
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine(L10n.Get("SAVE_AUTO"));
             Console.ResetColor();
             Utils.Pause(400);
-        }
-
-        private static Player BuildPlayerFromSave(SaveData d)
-        {
-            var p = new Player(d.PlayerName)
-            {
-                Level          = d.Level,
-                HP             = d.HP,
-                MaxHP          = d.MaxHP,
-                MP             = d.MP,
-                MaxMP          = d.MaxMP,
-                BaseAttack     = d.BaseAttack,
-                BaseDefense    = d.BaseDefense,
-                EXP            = d.EXP,
-                EXPToNextLevel = d.EXPToNextLevel,
-                CorruptionLevel   = d.CorruptionLevel,
-                AcceptedDarkPower = d.AcceptedDark,
-                HelpedVillager    = d.HelpedVillager,
-                TotalBerserkUses  = d.BerserkUses,
-                Class             = (PlayerClass)d.ClassId
-            };
-
-            p.InitClassSkills();
-            if (p.Level >= GameConstants.AdvancedSkillLevel)
-                p.Skills.AddRange(SkillSystem.GetAdvancedSkills(p.Class));
-            if (p.Level >= GameConstants.UltraSkillLevel)
-                p.Skills.AddRange(SkillSystem.GetUltraSkills(p.Class));
-
-            return p;
         }
 
         // ── Settings ─────────────────────────────────────────────────────────
@@ -430,33 +345,9 @@ namespace RPGGame
             Console.WriteLine("  ─────────────────────────────────────────");
             Console.ResetColor();
 
-            if (File.Exists(SaveFile))
-                File.Delete(SaveFile);
+            _saveService.Delete();
 
             Utils.PressAnyKey(L10n.Get("PRESS_ANY_KEY_MENU"));
         }
-    }
-
-    // ─── Save data ────────────────────────────────────────────────────────────
-
-    public class SaveData
-    {
-        public int Version { get; set; } = GameConstants.SaveVersion;
-        public string PlayerName { get; set; } = "";
-        public int Level { get; set; }
-        public int HP { get; set; }
-        public int MaxHP { get; set; }
-        public int MP { get; set; }
-        public int MaxMP { get; set; }
-        public int BaseAttack { get; set; }
-        public int BaseDefense { get; set; }
-        public int EXP { get; set; }
-        public int EXPToNextLevel { get; set; }
-        public int CorruptionLevel { get; set; }
-        public bool AcceptedDark { get; set; }
-        public bool HelpedVillager { get; set; }
-        public int BerserkUses { get; set; }
-        public int ClassId { get; set; }
-        public int CurrentChapter { get; set; }
     }
 }

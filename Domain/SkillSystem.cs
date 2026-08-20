@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using RPGGame.Content;
 
-namespace RPGGame
+namespace RPGGame.Domain
 {
     public enum SkillEffect
     {

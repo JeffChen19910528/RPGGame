@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using RPGGame.Content;
 
-namespace RPGGame
+namespace RPGGame.Domain
 {
     public enum StatusEffect { None, Burn, Stun, Defending }
     public enum PlayerClass { Warrior, Mage, Assassin, Paladin, Ranger }
@@ -72,6 +73,9 @@ namespace RPGGame
         // Skills
         public List<Skill> Skills { get; set; }
 
+        /// <summary>Skills unlocked by the most recent LevelUp; empty otherwise. Caller drains it for display.</summary>
+        public List<Skill> LastUnlockedSkills { get; } = new();
+
         // Computed stats
         public int Attack => BaseAttack + (Weapon?.AtkBonus ?? 0);
         public int Defense => BaseDefense + (Armor?.DefBonus ?? 0);
@@ -115,26 +119,19 @@ namespace RPGGame
 
             if (TotalBerserkUses >= 2)
                 CorruptionLevel++;
-
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine();
-            Console.WriteLine(L10n.Get("BERSERK_TRIGGER_1", Name));
-            Console.WriteLine(L10n.Get("BERSERK_TRIGGER_2"));
-            Console.ResetColor();
-            Utils.Pause(600);
         }
 
-        public void UpdateBerserkTick()
+        /// <summary>Ticks down an active berserk state. Returns true the turn it ends.</summary>
+        public bool UpdateBerserkTick()
         {
-            if (!IsBerserk) return;
+            if (!IsBerserk) return false;
             BerserkTurnsLeft--;
             if (BerserkTurnsLeft <= 0)
             {
                 IsBerserk = false;
-                Console.ForegroundColor = ConsoleColor.DarkMagenta;
-                Console.WriteLine(L10n.Get("BERSERK_END", Name));
-                Console.ResetColor();
+                return true;
             }
+            return false;
         }
 
         // ── Combat ──────────────────────────────────────────────────────────
@@ -172,6 +169,8 @@ namespace RPGGame
 
         private void LevelUp()
         {
+            LastUnlockedSkills.Clear();
+
             Level++;
             EXP -= EXPToNextLevel;
             EXPToNextLevel = (int)(EXPToNextLevel * 1.6);
@@ -185,18 +184,14 @@ namespace RPGGame
             {
                 var advanced = SkillSystem.GetAdvancedSkills(Class);
                 Skills.AddRange(advanced);
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine(L10n.Get("SKILL_UNLOCK", advanced[0].Name, advanced[1].Name));
-                Console.ResetColor();
+                LastUnlockedSkills.AddRange(advanced);
             }
 
             if (Level == GameConstants.UltraSkillLevel)
             {
                 var ultra = SkillSystem.GetUltraSkills(Class);
                 Skills.AddRange(ultra);
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.WriteLine(L10n.Get("SKILL_UNLOCK_ULTRA", ultra[0].Name));
-                Console.ResetColor();
+                LastUnlockedSkills.AddRange(ultra);
             }
         }
 
@@ -205,67 +200,11 @@ namespace RPGGame
         public void EquipWeapon(Equipment weapon)
         {
             Weapon = weapon;
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(L10n.Get("EQUIP_WEAPON_MSG", weapon.Name, weapon.AtkBonus));
-            Console.ResetColor();
         }
 
         public void EquipArmor(Equipment armor)
         {
             Armor = armor;
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(L10n.Get("EQUIP_ARMOR_MSG", armor.Name, armor.DefBonus));
-            Console.ResetColor();
-        }
-
-        // ── Display ─────────────────────────────────────────────────────────
-
-        public void PrintStatus()
-        {
-            Console.WriteLine();
-            Console.Write("  【");
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"{Name}");
-            if (IsBerserk)
-            {
-                Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.Write($" {L10n.Get("STATUS_BERSERK_TAG")}({BerserkTurnsLeft})★");
-            }
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write($" Lv.{Level}】");
-            if (CurrentStatus != StatusEffect.None && CurrentStatus != StatusEffect.Defending)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write($" [{CurrentStatus}x{StatusTurns}]");
-            }
-            else if (CurrentStatus == StatusEffect.Defending)
-            {
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write($" {L10n.Get("STATUS_DEFENDING")}");
-            }
-            Console.ResetColor();
-            Console.WriteLine();
-
-            Console.Write("  HP ");
-            ConsoleColor hpColor = HP > MaxHP * 0.5 ? ConsoleColor.Green
-                                 : HP > MaxHP * 0.25 ? ConsoleColor.Yellow
-                                 : ConsoleColor.Red;
-            Utils.DrawProgressBar(HP, MaxHP, 20, hpColor);
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine($" {HP}/{MaxHP}");
-
-            Console.Write("  MP ");
-            Utils.DrawProgressBar(MP, MaxMP, 20, ConsoleColor.Blue);
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine($" {MP}/{MaxMP}");
-
-            Console.Write($"  {L10n.Get("STATUS_RAGE")}");
-            ConsoleColor rageColor = IsBerserk ? ConsoleColor.Magenta : ConsoleColor.DarkRed;
-            Utils.DrawProgressBar(IsBerserk ? MaxRageEnergy : RageEnergy, MaxRageEnergy, 20, rageColor);
-            Console.ForegroundColor = IsBerserk ? ConsoleColor.Magenta : ConsoleColor.DarkGray;
-            Console.Write($" {(IsBerserk ? L10n.Get("STATUS_RAGE_MAX") : $"{RageEnergy}/{MaxRageEnergy}")}");
-            Console.ResetColor();
-            Console.WriteLine();
         }
     }
 }

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace RPGGame
+namespace RPGGame.Content
 {
     public enum Language { Chinese = 0, English = 1, Japanese = 2 }
 

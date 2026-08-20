@@ -1,7 +1,8 @@
 using System;
 using System.Threading;
+using RPGGame.Domain;
 
-namespace RPGGame
+namespace RPGGame.Presentation
 {
     /// <summary>
     /// Manages all ASCII art rendering and combat animations.

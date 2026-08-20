@@ -1,6 +1,9 @@
 using System;
+using RPGGame.Domain;
+using RPGGame.Presentation;
+using RPGGame.Systems;
 
-namespace RPGGame
+namespace RPGGame.Content
 {
     public class StoryManager
     {
@@ -165,6 +168,7 @@ namespace RPGGame
                 _player.CorruptionLevel += 2;
                 _player.BaseAttack += 6;
                 _player.EquipWeapon(new Equipment("黑暗符石強化", atk: 6));
+                PrintEquipWeaponMessage(_player.Weapon!);
 
                 Console.ForegroundColor = ConsoleColor.DarkMagenta;
                 Utils.TypeText("\n  黑暗能量衝入你的全身，你感到無比強大。", 38, ConsoleColor.DarkMagenta);
@@ -179,6 +183,7 @@ namespace RPGGame
                 Utils.TypeText("\n  你用力將符石砸在地上，黑暗能量四散消逝。", 38);
                 Utils.TypeText("  「我不需要這種東西。」你低聲說，聲音十分堅定。", 38, ConsoleColor.White);
                 _player.EquipArmor(new Equipment("林中鐵甲", def: 4, hp: 10));
+                PrintEquipArmorMessage(_player.Armor!);
                 _player.MaxHP += 10;
                 _player.HP = Math.Min(_player.HP + 10, _player.MaxHP);
             }
@@ -274,6 +279,7 @@ namespace RPGGame
             {
                 var darkBlade = new Equipment("黑暗聖劍", atk: 12);
                 _player.EquipWeapon(darkBlade);
+                PrintEquipWeaponMessage(darkBlade);
                 Console.ForegroundColor = ConsoleColor.DarkMagenta;
                 Console.WriteLine("\n  ✦ 黑暗能量注入聖劍，你感覺它在呼應你體內的腐化。");
                 Console.ResetColor();
@@ -282,6 +288,7 @@ namespace RPGGame
             {
                 var holyBlade = new Equipment("淨化聖劍", atk: 10, def: 2);
                 _player.EquipWeapon(holyBlade);
+                PrintEquipWeaponMessage(holyBlade);
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("\n  ✦ 聖劍的力量在你手中閃耀，彷彿認可了你的意志。");
                 Console.ResetColor();
@@ -1265,6 +1272,20 @@ namespace RPGGame
             ShowGameOver();
             GameOverTriggered = true;
             return true;
+        }
+
+        private static void PrintEquipWeaponMessage(Equipment weapon)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(L10n.Get("EQUIP_WEAPON_MSG", weapon.Name, weapon.AtkBonus));
+            Console.ResetColor();
+        }
+
+        private static void PrintEquipArmorMessage(Equipment armor)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(L10n.Get("EQUIP_ARMOR_MSG", armor.Name, armor.DefBonus));
+            Console.ResetColor();
         }
     }
 }

@@ -1,4 +1,4 @@
-namespace RPGGame
+namespace RPGGame.Domain
 {
     public static class GameConstants
     {

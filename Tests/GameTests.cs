@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RPGGame.Domain;
 
-namespace RPGGame
+namespace RPGGame.Tests
 {
     public static class GameTests
     {

@@ -1,6 +1,7 @@
 using System;
+using RPGGame.Tests;
 
-namespace RPGGame
+namespace RPGGame.App
 {
     class Program
     {

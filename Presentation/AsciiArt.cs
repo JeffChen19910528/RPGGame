@@ -1,6 +1,7 @@
 using System;
+using RPGGame.Domain;
 
-namespace RPGGame
+namespace RPGGame.Presentation
 {
     public static class AsciiArt
     {

@@ -1,6 +1,9 @@
 using System;
+using RPGGame.Domain;
+using RPGGame.Presentation;
+using RPGGame.Content;
 
-namespace RPGGame
+namespace RPGGame.Systems
 {
     public enum BattleResult { Victory, Defeat }
 
@@ -30,7 +33,7 @@ namespace RPGGame
                 AnimationSystem.DrawBattleScreen(_player, enemy, turn);
 
                 // Player burn tick
-                if (!ProcessPlayerBurn(enemy)) break;
+                if (!ProcessPlayerBurn()) break;
 
                 // Player action
                 if (_player.CurrentStatus == StatusEffect.Stun)
@@ -47,7 +50,12 @@ namespace RPGGame
                 if (!enemy.IsAlive) break;
 
                 // Berserk countdown
-                _player.UpdateBerserkTick();
+                if (_player.UpdateBerserkTick())
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                    Console.WriteLine(L10n.Get("BERSERK_END", _player.Name));
+                    Console.ResetColor();
+                }
 
                 // Enemy turn
                 DoEnemyTurn(enemy);
@@ -87,8 +95,6 @@ namespace RPGGame
             return _player.IsAlive;
         }
 
-        private bool ProcessPlayerBurn(Enemy _) => ProcessPlayerBurn();
-
         private void DoPlayerTurn(Enemy enemy)
         {
             while (true)
@@ -121,7 +127,16 @@ namespace RPGGame
             bool wasBerserk = _player.IsBerserk;
             _player.AddRage(amount);
             if (!wasBerserk && _player.IsBerserk)
+            {
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine();
+                Console.WriteLine(L10n.Get("BERSERK_TRIGGER_1", _player.Name));
+                Console.WriteLine(L10n.Get("BERSERK_TRIGGER_2"));
+                Console.ResetColor();
+                Utils.Pause(600);
+
                 AnimationSystem.AnimateBerserkActivation(_player);
+            }
         }
 
         private void DoNormalAttack(Enemy enemy)
@@ -327,6 +342,14 @@ namespace RPGGame
                 {
                     Log(ConsoleColor.Yellow, L10n.Get("BATTLE_LEVEL_UP", _player.Name, _player.Level));
                     Log(ConsoleColor.Yellow, L10n.Get("BATTLE_LEVEL_STATS"));
+
+                    if (_player.LastUnlockedSkills.Count > 0)
+                    {
+                        if (_player.Level == GameConstants.UltraSkillLevel)
+                            Log(ConsoleColor.DarkYellow, L10n.Get("SKILL_UNLOCK_ULTRA", _player.LastUnlockedSkills[0].Name));
+                        else
+                            Log(ConsoleColor.Yellow, L10n.Get("SKILL_UNLOCK", _player.LastUnlockedSkills[0].Name, _player.LastUnlockedSkills[1].Name));
+                    }
                 }
 
                 _player.RestoreMP(GameConstants.PostBattleMPRestore);

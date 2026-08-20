@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace RPGGame
+namespace RPGGame.Domain
 {
     public class Enemy
     {
@@ -89,35 +89,6 @@ namespace RPGGame
             StunTurns--;
             if (StunTurns <= 0) IsStunned = false;
             return wasStunned;
-        }
-
-        // ── Display ─────────────────────────────────────────────────────────
-
-        public void PrintStatus()
-        {
-            Console.Write("\n  【");
-            Console.ForegroundColor = NameColor;
-            Console.Write(Name);
-            Console.ResetColor();
-            Console.Write("】");
-
-            if (IsStunned)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write(" [眩暈]");
-            }
-            if (IsBurning)
-            {
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.Write($" [燃燒x{BurnTurns}]");
-            }
-            Console.ResetColor();
-            Console.WriteLine();
-
-            Console.Write("  HP ");
-            Utils.DrawProgressBar(HP, MaxHP, 20, ConsoleColor.DarkRed);
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine($" {HP}/{MaxHP}");
         }
 
         // ── Factory Methods ─────────────────────────────────────────────────
